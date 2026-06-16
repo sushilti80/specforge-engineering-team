@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "./hooks/scripts/session-start.sh",
+        "timeout": 5
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "./hooks/scripts/subagent-stop.sh",
+        "timeout": 5,
+        "loop_limit": 2
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "./hooks/scripts/after-spec-edit.sh",
+        "timeout": 5
+      }
+    ],
+    "stop": [
+      {
+        "command": "./hooks/scripts/session-stop.sh",
+        "timeout": 5,
+        "loop_limit": 1
+      }
+    ]
+  }
+}

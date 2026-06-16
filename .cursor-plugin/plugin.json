@@ -1,0 +1,33 @@
+{
+  "name": "specforge-engineering-team",
+  "displayName": "SpecForge Engineering Team",
+  "version": "1.0.0",
+  "description": "SpecForge — reusable spec-driven engineering team for Cursor and Claude: 20 agents, 9 skills, checkpoint hooks, project memory, and bootstrap template.",
+  "author": {
+    "name": "SpecForge"
+  },
+  "homepage": "https://github.com/sushilti80/specforge-engineering-team",
+  "repository": "https://github.com/sushilti80/specforge-engineering-team",
+  "license": "MIT",
+  "keywords": [
+    "specforge",
+    "spec-driven",
+    "engineering",
+    "agents",
+    "orchestrator",
+    "requirements",
+    "architecture",
+    "verification",
+    "memory",
+    "hooks",
+    "claude",
+    "cursor"
+  ],
+  "category": "developer-tools",
+  "tags": [
+    "specs",
+    "multi-agent",
+    "playbook",
+    "bootstrap"
+  ]
+}

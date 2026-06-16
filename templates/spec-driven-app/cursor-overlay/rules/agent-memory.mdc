@@ -1,0 +1,29 @@
+---
+description: Project-scoped persistent agent memory under .cursor/agent-memory/
+alwaysApply: true
+---
+
+# Agent memory (this project)
+
+Persist learnings in **`.cursor/agent-memory/`** (version-controlled). Skill: **`spec-agent-memory`**.
+
+## Start of work
+
+1. Read `.cursor/agent-memory/_project/MEMORY.md`
+2. Read `.cursor/agent-memory/_project/specs-index.md`
+3. Read `.cursor/agent-memory/_project/learning-journal.md` (last 10 entries) if it exists
+4. If you are a named subagent, read `.cursor/agent-memory/<agent-name>/MEMORY.md`
+
+## End of work
+
+Update memory with concise, durable facts. Update `specs-index.md` when spec status changes.
+
+## Rules
+
+- Keep each `MEMORY.md` **under 200 lines**
+- **Never store secrets**
+- `.specs/` remains source of truth
+
+## HANDOFF
+
+Include **Memory updated:** with paths when you changed memory files.
