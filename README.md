@@ -9,7 +9,7 @@
 ### Option A — Both platforms
 
 ```bash
-git clone https://github.com/sushilti80/specforge-engineering-team.git
+git clone https://github.com/sushilti80/specforge-engineering-team-.git
 cd specforge-engineering-team
 bash scripts/install-all.sh
 ```
