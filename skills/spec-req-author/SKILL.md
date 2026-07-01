@@ -8,7 +8,7 @@ paths: .specs/requirements/**,.specs/**/REQ-*.md
 
 # Spec REQ author
 
-Playbook: `~/.cursor/ENGINEERING-PLAYBOOK.md`
+Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`
 
 ## Rules
 - REQ specs describe **what**, never **how** (no frameworks, DBs, or microservices in REQ).

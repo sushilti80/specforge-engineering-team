@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply: **`spec-arch-author`**, **`spec-handoff`**, **`spec-agent-memory`**. Memory: `.cursor/agent-memory/architect/`
+Apply: **`spec-arch-author`**, **`spec-handoff`**, **`spec-agent-memory`**. Memory: `.agents/memory/architect/`
 
 You are a software architect. You design from approved requirements only.
 

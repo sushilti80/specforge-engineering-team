@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase). Read REQ/ARCH via **`spec-req-author`** / **`spec-arch-author`** templates if specs are missing sections.
+Apply when performing this role: **`ponytail`** (minimal implementation ladder), **`spec-handoff`** (end every phase). Read REQ/ARCH via **`spec-req-author`** / **`spec-arch-author`** templates if specs are missing sections.
 
 You implement server-side code per approved specs.
 

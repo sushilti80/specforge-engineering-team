@@ -43,13 +43,13 @@ def main() -> None:
 
     modified = data.get("modified_files") or []
     spec_touch = any(
-        ".specs/" in p or "agent-memory" in p for p in modified
+        ".specs/" in p or "agent-memory" in p or ".agents/memory/" in p for p in modified
     )
 
     msg = (
         f"Gate checkpoint (Principle 8): subagent `{agent}` completed. "
         "Before the next gate: (1) update `.specs/` if needed, "
-        "(2) update `.cursor/agent-memory/_project/specs-index.md`, "
+        "(2) update `.agents/memory/_project/specs-index.md`, "
         "(3) update orchestrator MEMORY.md, "
         "(4) optionally write `.specs/handoffs/GATE-*.md`. "
         "Then delegate to the next agent with spec paths only — fresh subagent, no prose paste."

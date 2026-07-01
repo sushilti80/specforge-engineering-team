@@ -1,19 +1,19 @@
-# Bootstrap plan: spec-driven engineering team (Cursor / Claude)
+# Bootstrap plan: spec-driven engineering team (multi-tool)
 
 **Goal:** Harness the playbook on a real project in under 30 minutes, starting at **Tier 1** and promoting only when complexity demands it.
 
-**User-level harness (already on your machine):**
+**Install harness:** `bash scripts/install-all.sh` (or per-platform — see [`MULTI-TOOL.md`](MULTI-TOOL.md))
 
-| Layer | Location | Scope |
-|-------|----------|-------|
-| Playbook | `~/.cursor/ENGINEERING-PLAYBOOK.md` | All projects |
-| Executive summary | `~/.cursor/SPEC-DRIVEN-EXECUTIVE-SUMMARY.md` | Strategy |
-| Recipes | `~/.cursor/ENGINEERING-RECIPES.md` | Production flows |
-| Agents (20) | `~/.cursor/agents/*.md` | All projects |
-| Spec skills (8) | `~/.cursor/skills/spec-*/` | All projects |
-| App template | `~/.cursor/templates/spec-driven-app/` | Copy into each repo |
+**User-level harness (SPECFORGE_HOME — first path that exists):**
 
-**Project-level (per repo):** `.specs/`, `.cursor/rules/`, `.cursor/agent-memory/`, optional `.cursor/skills/`
+| Layer | Cursor | Codex | OpenCode | Claude |
+|-------|--------|-------|----------|--------|
+| Playbook | `~/.cursor/ENGINEERING-PLAYBOOK.md` | `~/.codex/specforge/ENGINEERING-PLAYBOOK.md` | `~/.config/opencode/specforge/ENGINEERING-PLAYBOOK.md` | `~/.claude/docs/specforge/ENGINEERING-PLAYBOOK.md` |
+| Recipes | `~/.cursor/ENGINEERING-RECIPES.md` | same dir | same dir | same dir |
+| Agents (20) | plugin | skills + AGENTS.md | `~/.config/opencode/agents/` | `~/.claude/agents/` |
+| Spec skills (9) | plugin | `~/.agents/skills/` | `~/.config/opencode/skills/` | `~/.claude/skills/` |
+
+**Project-level (per repo):** `.specs/`, `AGENTS.md`, `.agents/memory/`, `.cursor/rules/` (Cursor), optional `.opencode/`
 
 ---
 
@@ -29,8 +29,9 @@ flowchart TB
   end
   subgraph project [Git repo — your-app/]
     Specs[.specs/]
+    AgentsMd[AGENTS.md]
     Rules[.cursor/rules/]
-    Memory[.cursor/agent-memory/]
+    Memory[.agents/memory/]
     Code[src/]
   end
   Cursor[Cursor Agent] --> Agents
@@ -96,17 +97,13 @@ Record in chat: `Tier: 1`
 From your **project root**:
 
 ```bash
-export PROJECT_ROOT="$(pwd)"
-bash ~/.cursor/templates/spec-driven-app/scripts/bootstrap-project.sh "$PROJECT_ROOT"
+bash scripts/bootstrap-project.sh "$PROJECT_ROOT"
 ```
 
-Or manually:
+Or from harness template path after install:
 
 ```bash
-cp -R ~/.cursor/templates/spec-driven-app/.specs .
-cp -R ~/.cursor/templates/spec-driven-app/.cursor .
-cp -R ~/.cursor/templates/spec-driven-app/scripts .
-bash scripts/bootstrap-agent-memory.sh   # all 20 agent memory folders
+bash SPECFORGE_HOME/templates/spec-driven-app/scripts/bootstrap-project.sh "$PROJECT_ROOT"
 ```
 
 Optional — copy spec skills into repo (team shares via git):

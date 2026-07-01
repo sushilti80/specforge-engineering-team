@@ -2,7 +2,7 @@
 
 **Audience:** Engineering leadership, architecture, program management  
 **Version:** 1.0 · May 2026  
-**Companion docs:** `ENGINEERING-PLAYBOOK.md`, `~/.cursor/agents/`, `~/.cursor/skills/spec-*/`
+**Companion docs:** `ENGINEERING-PLAYBOOK.md`, harness `agents/`, harness `skills/spec-*/`
 
 ---
 
@@ -242,7 +242,7 @@ After go-live, the orchestrator selects a **recipe** (not always the full featur
 | `maintenance` | Upgrades, refactors |
 | `infra-change` | IaC, CI/CD |
 
-Details: `~/.cursor/ENGINEERING-RECIPES.md` · invoke `/spec-recipes`
+Details: `SPECFORGE_HOME/ENGINEERING-RECIPES.md` · invoke `/spec-recipes`
 
 ---
 
@@ -250,10 +250,10 @@ Details: `~/.cursor/ENGINEERING-RECIPES.md` · invoke `/spec-recipes`
 
 | Asset | Location |
 |-------|----------|
-| Playbook | `~/.cursor/ENGINEERING-PLAYBOOK.md` |
-| Agents (20) | `~/.cursor/agents/` |
-| Spec skills (7) | `~/.cursor/skills/spec-*/` |
-| App template | `~/.cursor/templates/spec-driven-app/` |
+| Playbook | `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` |
+| Agents (20) | `SPECFORGE_HOME/agents/` |
+| Spec skills (7) | `SPECFORGE_HOME/skills/spec-*/` |
+| App template | `SPECFORGE_HOME/templates/spec-driven-app/` |
 | Invoke cheat sheet | `/spec-pipeline` |
 
 ---

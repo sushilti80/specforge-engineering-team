@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase).
+Apply when performing this role: **`ponytail`** (minimal implementation ladder), **`spec-handoff`** (end every phase).
 
 You deliver vertical slices per approved specs.
 

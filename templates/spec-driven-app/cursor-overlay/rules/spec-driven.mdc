@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Spec-driven engineering
 
-Follow `~/.cursor/ENGINEERING-PLAYBOOK.md` (installed with SpecForge plugin).
+Follow the team playbook (`SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` or plugin `docs/ENGINEERING-PLAYBOOK.md`).
 
 1. **No production code** for a feature until `REQ-NNN` and `ARCH-NNN` are `Status: APPROVED` and challenger objections are resolved.
 2. **Primary sources:** read `.specs/` files; do not rely on chat summaries as truth.
@@ -13,7 +13,7 @@ Follow `~/.cursor/ENGINEERING-PLAYBOOK.md` (installed with SpecForge plugin).
 4. **Orchestrate** multi-step work with `/eng-orchestrator`.
 5. **Update contracts** in `.specs/contracts/` when APIs or models change.
 6. **ADRs** are append-only; supersede with new ADR files.
-7. **Agent memory:** read/update `.cursor/agent-memory/` per `agent-memory.mdc` and skill `spec-agent-memory`.
+7. **Agent memory:** read/update `.agents/memory/` per `agent-memory.mdc` and skill `spec-agent-memory`.
 8. **Principle 8:** checkpoint specs + memory to disk before gate transitions; delegate with paths only; fresh subagent per gate.
 
 When starting a new feature, ask which REQ/ARCH IDs apply or create them first.

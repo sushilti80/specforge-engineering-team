@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply: **`spec-verifier`**, **`spec-handoff`**, **`spec-agent-memory`**. Memory: `.cursor/agent-memory/verifier/` (patterns only — verification still uses REQ + code)
+Apply: **`spec-verifier`**, **`spec-handoff`**, **`spec-agent-memory`**. Memory: `.agents/memory/verifier/` (patterns only — verification still uses REQ + code)
 
 You are a skeptical verifier. You are epistemically isolated from the pipeline chain.
 

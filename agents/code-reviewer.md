@@ -8,7 +8,7 @@ readonly: true
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase). Use **`spec-guardian-drift`** if checking contract alignment.
+Apply when performing this role: **`spec-handoff`** (end every phase). Use **`ponytail-review`** for over-engineering / bloat (complements correctness review). Use **`spec-guardian-drift`** if checking contract alignment.
 
 You review code against specs and contracts — not against what you were told was built.
 

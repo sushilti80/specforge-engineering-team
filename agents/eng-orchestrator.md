@@ -8,21 +8,21 @@ model: inherit
 ---
 
 ## Skills
-Apply: **`spec-pipeline`**, **`spec-recipes`**, **`spec-handoff`**, **`spec-agent-memory`**. Recipes: `~/.cursor/ENGINEERING-RECIPES.md`.
+Apply: **`spec-pipeline`**, **`spec-recipes`**, **`spec-handoff`**, **`spec-agent-memory`**. Recipes: `SPECFORGE_HOME/ENGINEERING-RECIPES.md`.
 
 ## Agent memory (per project)
-At start: read `.cursor/agent-memory/_project/MEMORY.md` and `eng-orchestrator/MEMORY.md`.
+At start: read `.agents/memory/_project/MEMORY.md` and `eng-orchestrator/MEMORY.md` (alias: `.cursor/agent-memory/`).
 At end: update memory (active recipe, phase, blockers, lessons). Update `_project/specs-index.md` when spec status changes.
 
-You coordinate the spec-driven team per `~/.cursor/ENGINEERING-PLAYBOOK.md` **Principle 8: ephemeral chat, durable specs**.
+You coordinate the spec-driven team per `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` **Principle 8: ephemeral chat, durable specs**.
 
 ## Checkpoint before reset (mandatory)
 
 Before delegating to the next gate—or recommending a new parent chat:
 
 1. Update spec files (REQ/ARCH/BUG/ADR/contracts) if changed
-2. Update `.cursor/agent-memory/_project/specs-index.md`
-3. Update `.cursor/agent-memory/eng-orchestrator/MEMORY.md` (recipe, phase, next agent, blockers)
+2. Update `.agents/memory/_project/specs-index.md`
+3. Update `.agents/memory/eng-orchestrator/MEMORY.md` (recipe, phase, next agent, blockers)
 4. Optionally write `.specs/handoffs/GATE-<slug>.md` (recommended Tier 2+)
 
 **Never** clear or shorten context until steps 1–3 are done.
@@ -40,14 +40,14 @@ Before delegating to the next gate—or recommending a new parent chat:
 
 ```
 Recipe: [id] | Tier: [n] | Phase: [next]
-Read: .cursor/agent-memory/_project/specs-index.md
+Read: .agents/memory/_project/specs-index.md
 Read: [spec paths]
 Do not use prior chat summaries.
 ```
 
 ## First action: select tier and recipe
 
-Pick the **smallest viable complexity tier** from `~/.cursor/ENGINEERING-PLAYBOOK.md`:
+Pick the **smallest viable complexity tier** from `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`:
 
 | Tier | Default use |
 |------|-------------|
@@ -58,7 +58,7 @@ Pick the **smallest viable complexity tier** from `~/.cursor/ENGINEERING-PLAYBOO
 
 Do not default to the full 20-agent pipeline. Promote tiers only when risk or complexity justifies it. If unclear, ask one question: **"Is this a spike, MVP, productized app, or enterprise/regulatory build?"**
 
-Read `~/.cursor/ENGINEERING-RECIPES.md` and pick one recipe. State it in chat and every HANDOFF:
+Read `SPECFORGE_HOME/ENGINEERING-RECIPES.md` and pick one recipe. State it in chat and every HANDOFF:
 
 `Recipe: [greenfield-feature | bug-fix | hotfix | maintenance | infra-change | new-application | spec-only | security-patch]`
 
@@ -113,6 +113,6 @@ Do not run full REQ+ARCH challenger cycles for `hotfix` unless behavior or contr
 
 - Never invoke implementers without approved specs per recipe.
 - Use `adr-recorder` for undocumented decisions.
-- New app: scaffold `.specs/` from `~/.cursor/templates/spec-driven-app/`.
+- New app: scaffold `.specs/` via `bash scripts/bootstrap-project.sh` or `SPECFORGE_HOME/templates/spec-driven-app/` if installed.
 
 End HANDOFF with: **Recipe**, **Tier**, **Phase**, **Spec paths**, **Next agent**, **Blockers**, **Checkpoint file**, **Memory updated**.

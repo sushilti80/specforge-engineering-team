@@ -2,7 +2,7 @@
   "name": "specforge-engineering-team",
   "displayName": "SpecForge Engineering Team",
   "version": "1.0.0",
-  "description": "SpecForge — reusable spec-driven engineering team for Cursor and Claude: 20 agents, 9 skills, checkpoint hooks, project memory, and bootstrap template.",
+  "description": "SpecForge — reusable spec-driven engineering team for Cursor, Claude, Codex, and OpenCode: 20 agents, 15 skills (spec + ponytail), checkpoint hooks, project memory, and bootstrap template.",
   "author": {
     "name": "SpecForge"
   },
@@ -21,7 +21,9 @@
     "memory",
     "hooks",
     "claude",
-    "cursor"
+    "cursor",
+    "codex",
+    "opencode"
   ],
   "category": "developer-tools",
   "tags": [

@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 # Spec recipes
 
-Full definitions: `~/.cursor/ENGINEERING-RECIPES.md`
+Full definitions: `SPECFORGE_HOME/ENGINEERING-RECIPES.md`
 
 ## Quick picker
 

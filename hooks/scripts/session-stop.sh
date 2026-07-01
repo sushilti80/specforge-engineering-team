@@ -6,6 +6,17 @@ import sys
 from datetime import datetime, timezone, timedelta
 
 
+def resolve_journal(cwd: str) -> str | None:
+    for rel in (
+        ".agents/memory/_project/learning-journal.md",
+        ".cursor/agent-memory/_project/learning-journal.md",
+    ):
+        path = os.path.join(cwd, rel)
+        if os.path.isfile(path):
+            return path
+    return None
+
+
 def main() -> None:
     try:
         data = json.load(sys.stdin)
@@ -18,8 +29,8 @@ def main() -> None:
         return
 
     cwd = data.get("cwd") or os.getcwd()
-    journal = os.path.join(cwd, ".cursor", "agent-memory", "_project", "learning-journal.md")
-    if not os.path.isfile(journal):
+    journal = resolve_journal(cwd)
+    if not journal:
         print("{}")
         return
 
@@ -35,7 +46,7 @@ def main() -> None:
 
     msg = (
         "Session ending after recent spec/memory edits. "
-        "Distill learning-journal entries into `.cursor/agent-memory/*/MEMORY.md` "
+        "Distill learning-journal entries into `.agents/memory/*/MEMORY.md` "
         "and update `specs-index.md`. Then start a fresh chat for the next gate if context is stale."
     )
     print(json.dumps({"followup_message": msg}))

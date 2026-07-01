@@ -6,6 +6,17 @@ import sys
 from datetime import datetime, timezone
 
 
+def resolve_journal_dir(cwd: str) -> str:
+    for rel in (".agents/memory/_project", ".cursor/agent-memory/_project"):
+        path = os.path.join(cwd, rel)
+        if os.path.isdir(os.path.dirname(path)) or rel.startswith(".agents"):
+            os.makedirs(path, exist_ok=True)
+            return path
+    fallback = os.path.join(cwd, ".agents", "memory", "_project")
+    os.makedirs(fallback, exist_ok=True)
+    return fallback
+
+
 def main() -> None:
     try:
         data = json.load(sys.stdin)
@@ -20,14 +31,13 @@ def main() -> None:
 
     normalized = file_path.replace("\\", "/")
     is_spec = "/.specs/" in normalized or normalized.startswith(".specs/")
-    is_memory = "agent-memory" in normalized
+    is_memory = "agent-memory" in normalized or "/.agents/memory/" in normalized
     if not is_spec and not is_memory:
         print("{}")
         return
 
     cwd = data.get("cwd") or os.getcwd()
-    journal_dir = os.path.join(cwd, ".cursor", "agent-memory", "_project")
-    os.makedirs(journal_dir, exist_ok=True)
+    journal_dir = resolve_journal_dir(cwd)
     journal = os.path.join(journal_dir, "learning-journal.md")
 
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")

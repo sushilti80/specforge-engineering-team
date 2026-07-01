@@ -8,7 +8,7 @@ paths: .specs/architecture/**,.specs/decisions/**,.specs/contracts/**
 
 # Spec ARCH author
 
-Playbook: `~/.cursor/ENGINEERING-PLAYBOOK.md`
+Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`
 
 ## Gate
 Do not start unless linked `REQ-NNN.md` has `Status: APPROVED`.

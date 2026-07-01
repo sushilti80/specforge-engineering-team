@@ -1,7 +1,22 @@
 # Engineering Team Playbook
 > Spec-driven agentic engineering · Non-conformist design · Token efficiency
 >
-> Last updated: 2026-05-18 | **Bootstrap:** `~/.cursor/BOOTSTRAP-SPEC-DRIVEN-PROJECT.md` | Agents: `~/.cursor/agents/` | Spec skills: `~/.cursor/skills/spec-*/` | Template: `~/.cursor/templates/spec-driven-app/`
+> Last updated: 2026-06-20 | **Bootstrap:** `SPECFORGE_HOME/BOOTSTRAP-SPEC-DRIVEN-PROJECT.md` | Agents: harness `agents/` | Spec skills: harness `skills/spec-*/` | Template: harness `templates/spec-driven-app/`
+
+## SPECFORGE_HOME (multi-tool)
+
+Resolve playbook paths from the **first directory that exists** on your machine:
+
+| Platform | SPECFORGE_HOME |
+|----------|----------------|
+| Cursor | `~/.cursor/` |
+| Codex | `~/.codex/specforge/` |
+| OpenCode | `~/.config/opencode/specforge/` |
+| Claude Code | `~/.claude/docs/specforge/` |
+
+Example: `SPECFORGE_HOME/ENGINEERING-RECIPES.md` → `~/.codex/specforge/ENGINEERING-RECIPES.md` on Codex.
+
+See `SPECFORGE_HOME/MULTI-TOOL.md` for install and parity details.
 
 ---
 
@@ -19,7 +34,7 @@
 
 ## 0. Project agent memory
 
-Each **project** keeps durable agent notes under **`.cursor/agent-memory/`** (commit to git).
+Each **project** keeps durable agent notes under **`.agents/memory/`** (commit to git). Cursor resolves the same content via `.cursor/agent-memory/` symlink.
 
 | Path | Purpose |
 |------|---------|
@@ -29,7 +44,7 @@ Each **project** keeps durable agent notes under **`.cursor/agent-memory/`** (co
 | `<agent-name>/<topic>.md` | Detailed notes linked from MEMORY.md |
 
 **Flow:** read `_project` + your agent folder **at start**; update **at end** (skill: `spec-agent-memory`).  
-Template: `~/.cursor/templates/spec-driven-app/.cursor/agent-memory/`  
+Template: `SPECFORGE_HOME/templates/spec-driven-app/.cursor/agent-memory/`  
 Rule (in template): `.cursor/rules/agent-memory.mdc` (`alwaysApply: true`).
 
 Memory **indexes** `.specs/` — it does not replace specs as source of truth. Never store secrets.
@@ -120,10 +135,11 @@ qa-engineer         ──→  TP-NNN.md  (reads REQ-NNN.md, not impl summary)
      ▼
 test-runner         ──→  runs, fixes, re-runs
      │
-     ├──────────────────────┐
-     ▼                      ▼
-code-reviewer        security-reviewer    (parallel, readonly)
-     │
+     ├──────────────────────┬──────────────────────┐
+     ▼                      ▼                      ▼
+code-reviewer        security-reviewer    ponytail-review (skill)
+     │                      │                 (over-engineering)
+     └──────────────────────┴──────────────────────┘
      ▼
 verifier            ──→  reads REQ-NNN.md + codebase only
      │                    never reads handoff chain
@@ -253,7 +269,7 @@ Every project that uses this agent team **must** have this structure:
 
 ## 4. Agent Roster
 
-All agents live in `~/.cursor/agents/` (user-scope, all projects).
+All agents live in `SPECFORGE_HOME/agents/` (user-scope, all projects).
 
 ### Leadership & orchestration
 
@@ -413,6 +429,7 @@ Gate 2: Before any implementer runs
 Gate 3: Before verifier runs
   → test-runner must have passed
   → code-reviewer + security-reviewer must have no Critical issues open
+  → ponytail-review (skill) on diff for Tier 1+ — address delete-list or document waivers
 
 Gate 4: Before DONE
   → verifier report must show no "Incomplete or broken" items
@@ -423,7 +440,7 @@ Gate 4: Before DONE
 
 These can always run in parallel (no dependency on each other):
 
-- `code-reviewer` ∥ `security-reviewer`
+- `code-reviewer` ∥ `security-reviewer` ∥ `ponytail-review` (skill)
 - `backend-engineer` ∥ `frontend-engineer` (when contracts are finalized in ARCH)
 - `qa-engineer` writing TP ∥ implementers building (they both read the same REQ)
 
@@ -544,7 +561,7 @@ model: composer-2
 
 #### Keep agent prompts under ~400 words
 
-Every word in a system prompt is charged on **every turn** of that subagent. Long prompts dilute focus and increase cost. The agents in `~/.cursor/agents/` are already sized correctly.
+Every word in a system prompt is charged on **every turn** of that subagent. Long prompts dilute focus and increase cost. The agents in `SPECFORGE_HOME/agents/` are already sized correctly.
 
 #### Use skills for one-shot tasks
 
@@ -665,7 +682,7 @@ For in-IDE Cursor agent workflows, token efficiency comes from the strategies in
 
 ## Appendix D — Orchestrator recipes (production flows)
 
-Full definitions: `~/.cursor/ENGINEERING-RECIPES.md`
+Full definitions: `SPECFORGE_HOME/ENGINEERING-RECIPES.md`
 
 | Recipe | Use |
 |--------|-----|
@@ -686,15 +703,28 @@ Invoke: `/eng-orchestrator recipe: bug-fix — [description]` or skill `/spec-re
 
 | Skill | Path | Agent(s) |
 |-------|------|----------|
-| `spec-req-author` | `~/.cursor/skills/spec-req-author/` | requirements-analyst, qa-engineer |
-| `spec-arch-author` | `~/.cursor/skills/spec-arch-author/` | architect, adr-recorder, data-engineer |
-| `spec-challenger` | `~/.cursor/skills/spec-challenger/` | challenger |
-| `spec-handoff` | `~/.cursor/skills/spec-handoff/` | all agents (end of phase) |
-| `spec-verifier` | `~/.cursor/skills/spec-verifier/` | verifier, test-runner |
-| `spec-guardian-drift` | `~/.cursor/skills/spec-guardian-drift/` | spec-guardian, code-reviewer |
-| `spec-pipeline` | `~/.cursor/skills/spec-pipeline/` | eng-orchestrator (invoke `/spec-pipeline`) |
-| `spec-recipes` | `~/.cursor/skills/spec-recipes/` | eng-orchestrator (invoke `/spec-recipes`) |
-| `spec-agent-memory` | `~/.cursor/skills/spec-agent-memory/` | all agents (project `.cursor/agent-memory/`) |
+| `spec-req-author` | `SPECFORGE_HOME/skills/spec-req-author/` | requirements-analyst, qa-engineer |
+| `spec-arch-author` | `SPECFORGE_HOME/skills/spec-arch-author/` | architect, adr-recorder, data-engineer |
+| `spec-challenger` | `SPECFORGE_HOME/skills/spec-challenger/` | challenger |
+| `spec-handoff` | `SPECFORGE_HOME/skills/spec-handoff/` | all agents (end of phase) |
+| `spec-verifier` | `SPECFORGE_HOME/skills/spec-verifier/` | verifier, test-runner |
+| `spec-guardian-drift` | `SPECFORGE_HOME/skills/spec-guardian-drift/` | spec-guardian, code-reviewer |
+| `spec-pipeline` | `SPECFORGE_HOME/skills/spec-pipeline/` | eng-orchestrator (invoke `/spec-pipeline`) |
+| `spec-recipes` | `SPECFORGE_HOME/skills/spec-recipes/` | eng-orchestrator (invoke `/spec-recipes`) |
+| `spec-agent-memory` | `SPECFORGE_HOME/skills/spec-agent-memory/` | all agents (project `.cursor/agent-memory/`) |
+
+### Ponytail skills (vendored, MIT)
+
+Upstream: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) · refresh: `bash scripts/sync-ponytail.sh`
+
+| Skill | Path | Agent(s) |
+|-------|------|----------|
+| `ponytail` | `SPECFORGE_HOME/skills/ponytail/` | backend/frontend/fullstack-engineer |
+| `ponytail-review` | `SPECFORGE_HOME/skills/ponytail-review/` | code-reviewer (Gate 3) |
+| `ponytail-audit` | `SPECFORGE_HOME/skills/ponytail-audit/` | maintenance recipe |
+| `ponytail-debt` | `SPECFORGE_HOME/skills/ponytail-debt/` | maintenance recipe |
+
+Cursor: always-on rule `SPECFORGE_HOME/rules/ponytail.mdc` (bootstrapped to `.cursor/rules/`).
 
 ---
 
@@ -716,6 +746,7 @@ Invoke: `/eng-orchestrator recipe: bug-fix — [description]` or skill `/spec-re
 /qa-engineer Write test plan for REQ-001
 /test-runner Run tests and fix failures
 /code-reviewer Review the auth module changes
+# Optional Gate 3 — invoke skill ponytail-review on the diff for bloat
 /security-reviewer Review the payment module
 
 # Verify

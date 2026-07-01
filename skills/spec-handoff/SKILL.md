@@ -28,7 +28,7 @@ Every agent phase that hands off work **must** end with this block (fill all fie
 **Blockers:** [none | list — blocks next phase if any]
 
 **Memory updated:**
-- [.cursor/agent-memory/ paths]
+- [.agents/memory/ paths]
 
 **Checkpoint file:**
 - [.specs/handoffs/GATE-*.md or "none"]

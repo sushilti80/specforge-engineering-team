@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 # Spec-driven pipeline
 
-Playbook: `~/.cursor/ENGINEERING-PLAYBOOK.md` (or plugin `docs/ENGINEERING-PLAYBOOK.md`)  
-Recipes: `~/.cursor/ENGINEERING-RECIPES.md` · skill `spec-recipes`  
-Plugin: `specforge-engineering-team` — install with `bash scripts/install.sh`
+Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` (or plugin `docs/ENGINEERING-PLAYBOOK.md`)  
+Recipes: `SPECFORGE_HOME/ENGINEERING-RECIPES.md` · skill `spec-recipes`  
+Harness: `specforge-engineering-team` — install with `bash scripts/install.sh` (Cursor) or `bash scripts/install-all.sh`
 
 ## Recipes (production)
 
@@ -37,7 +37,7 @@ After each gate: update specs + memory → optional `.specs/handoffs/GATE-*.md` 
 |---|--------|----------|
 | 1 | `architect` | REQ `APPROVED` + challenger resolved |
 | 2 | implementers | ARCH `APPROVED` + challenger resolved |
-| 3 | `verifier` | tests green; no Critical from reviewers |
+| 3 | `verifier` | tests green; no Critical from reviewers; `ponytail-review` on diff (Tier 1+) |
 | 4 | DONE | verifier pass; `spec-guardian` no blocking drift |
 
 ## Pipeline
@@ -48,7 +48,7 @@ architect → challenger → ARCH APPROVED + ADRs + contracts
 implementers (parallel if contracts frozen)
 qa-engineer → TP from REQ
 test-runner
-code-reviewer ∥ security-reviewer
+code-reviewer ∥ security-reviewer ∥ ponytail-review (skill)
 verifier (REQ + code only)
 spec-guardian
 ```
@@ -64,16 +64,17 @@ spec-guardian
 | Implement | `/backend-engineer` `/frontend-engineer` `/fullstack-engineer` |
 | QA plan | `/qa-engineer` |
 | Tests | `/test-runner` |
-| Review | `/code-reviewer` `/security-reviewer` |
+| Review | `/code-reviewer` `/security-reviewer` + skill `ponytail-review` |
 | Verify | `/verifier` + skill `spec-verifier` |
 | Drift | `/spec-guardian` + skill `spec-guardian-drift` |
 
 ## New app
 
 ```bash
-cp -R ~/.cursor/templates/spec-driven-app/.specs ./your-app/
-cp -R ~/.cursor/templates/spec-driven-app/.cursor ./your-app/
+bash scripts/bootstrap-project.sh ./your-app
 ```
+
+Or copy template manually from `SPECFORGE_HOME/templates/spec-driven-app/` if installed.
 
 Then: `/eng-orchestrator Build [app description]; run full spec pipeline from REQ-001.`
 
@@ -88,3 +89,7 @@ Then: `/eng-orchestrator Build [app description]; run full spec pipeline from RE
 | `spec-verifier` | Verify vs REQ |
 | `spec-guardian-drift` | Drift audit |
 | `spec-pipeline` | This cheat sheet |
+| `ponytail` | Minimal code ladder (implementers) |
+| `ponytail-review` | Diff audit for over-engineering (Gate 3) |
+| `ponytail-audit` | Repo-wide bloat audit (maintenance recipe) |
+| `ponytail-debt` | Harvest `ponytail:` deferred shortcuts |

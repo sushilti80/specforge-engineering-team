@@ -1,20 +1,20 @@
 ---
 name: spec-agent-memory
 description: >-
-  Read and update project agent memory in .cursor/agent-memory/. Use at start
+  Read and update project agent memory in .agents/memory/. Use at start
   and end of subagent work for PRD, ARCH, codebase, and recipe learnings.
-paths: .cursor/agent-memory/**,.specs/**
+paths: .agents/memory/**,.cursor/agent-memory/**,.specs/**
 ---
 
 # Spec agent memory
 
-Project-scoped memory lives in **`.cursor/agent-memory/`** (commit to git for team continuity).
+Project-scoped memory lives in **`.agents/memory/`** (commit to git for team continuity). Cursor resolves the same content via `.cursor/agent-memory/` symlink.
 
 ## At session start
 
-1. Read `.cursor/agent-memory/_project/MEMORY.md` (shared context).
-2. Read `.cursor/agent-memory/_project/specs-index.md` (REQ/ARCH/BUG status).
-3. If you know your agent role (e.g. `backend-engineer`), read `.cursor/agent-memory/<agent-name>/MEMORY.md`.
+1. Read `.agents/memory/_project/MEMORY.md` (shared context).
+2. Read `.agents/memory/_project/specs-index.md` (REQ/ARCH/BUG status).
+3. If you know your agent role (e.g. `backend-engineer`), read `.agents/memory/<agent-name>/MEMORY.md`.
 
 ## What to record
 
@@ -46,9 +46,9 @@ Project-scoped memory lives in **`.cursor/agent-memory/`** (commit to git for te
 - **Never store secrets**, tokens, or credentials.
 - Prefer **paths and facts** over narrative; specs in `.specs/` remain source of truth — memory is an index, not a replacement.
 
-## Learning journal (plugin hooks)
+## Learning journal (Cursor plugin hooks)
 
-Plugin hooks append to `_project/learning-journal.md` on spec/memory edits. **Distill** durable entries into `MEMORY.md`; delete noise from the journal periodically.
+Cursor plugin hooks append to `_project/learning-journal.md` on spec/memory edits. **Distill** durable entries into `MEMORY.md`; delete noise from the journal periodically. Other tools: append manually or follow `SPECFORGE_HOME/MULTI-TOOL.md` checkpoint checklist.
 
 ## At session end
 
@@ -63,6 +63,6 @@ Add to HANDOFF when relevant:
 
 ```markdown
 **Memory updated:**
-- `.cursor/agent-memory/<agent>/MEMORY.md`
+- `.agents/memory/<agent>/MEMORY.md`
 - [other files]
 ```
