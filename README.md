@@ -162,6 +162,33 @@ specforge-engineering-team/
     └── bootstrap-project.sh
 ```
 
+## Acknowledgments
+
+SpecForge builds on ideas and tooling the open-source community shared first. We are grateful to the projects and people below.
+
+### Dietrich Gebert — [Ponytail](https://github.com/DietrichGebert/ponytail)
+
+Thank you, **Dietrich**, for open-sourcing Ponytail and for the “lazy senior dev” framing that changed how we think about AI-generated code. Your YAGNI → reuse → stdlib → native → minimum ladder gave SpecForge a missing piece: **minimal implementation** without dropping validation, security, or accessibility.
+
+We vendored six Ponytail skills under MIT (`vendor/ponytail/`, synced via `bash scripts/sync-ponytail.sh`) and wired them into Gate 3 review and our implementer agents. The always-on Cursor rule in bootstrapped projects is yours — we are users and integrators, not authors of that concept.
+
+If Ponytail helps your team ship smaller diffs, **[star the repo](https://github.com/DietrichGebert/ponytail)** and say thanks upstream.
+
+### [context-mode](https://github.com/mksglu/context-mode)
+
+Thank you to the **context-mode** maintainers for the sandboxed execution model that keeps verbose tool output out of the agent context window. SpecForge’s playbook (§7 Token Efficiency) assumes complementary tooling like `ctx_execute`, `ctx_execute_file`, and BM25 search — the same “minimal context, maximum signal” principle we apply to specs and handoffs.
+
+context-mode is a **separate install** (Cursor marketplace or MCP plugin), not bundled in this repo. We recommend it alongside SpecForge when agents run long pipelines, large test suites, or multi-file reviews. See the [context-mode README](https://github.com/mksglu/context-mode) for setup.
+
+### Other open source we build on
+
+| Project | Contribution |
+|---------|----------------|
+| [**AGENTS.md**](https://agents.md/) | Cross-tool project instructions — entry point for Cursor, Codex, Claude, and OpenCode |
+| **Agent skills & plugins ecosystem** | Cursor, Claude Code, OpenCode, and Codex CLI — the harness model we install into |
+
+If we missed a project your work drew from, open an issue or PR — we are happy to credit it here.
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Ponytail skills are MIT — see [vendor/ponytail/LICENSE](vendor/ponytail/LICENSE).
