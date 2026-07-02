@@ -7,6 +7,12 @@
         "timeout": 5
       }
     ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "./hooks/scripts/prompt-intent.sh",
+        "timeout": 5
+      }
+    ],
     "subagentStop": [
       {
         "command": "./hooks/scripts/subagent-stop.sh",

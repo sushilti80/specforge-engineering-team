@@ -611,7 +611,31 @@ This is why **specs as source of truth** is a token efficiency strategy as much 
 
 Parallel saves **wall time, not tokens**. Run parallel when outputs are independent.
 
----
+### Measuring tokens & release efficiency
+
+Exact per-subagent metering is **not available in hooks today**. Use three tiers (see **`SPECFORGE_HOME/ENGINEERING-METRICS.md`**):
+
+| Tier | Source |
+|------|--------|
+| A | Billing export (ground truth) |
+| B | `session.jsonl` ledger (hooks) + `ctx stats` + gate file counts |
+| C | `bash scripts/estimate-pipeline-tokens.sh <recipe> --tier N` |
+
+At release (Tier 2+): `bash scripts/collect-release-metrics.sh --since <tag>` → skill **`spec-release-metrics`** → `.specs/metrics/releases/REL-*.yaml`.
+
+Track **tokens/REQ** together with verifier gaps and spec drift — never optimize tokens alone.
+
+### Token discipline (harness)
+
+Skills: `spec-advisory`, `spec-token-budget`, `spec-vendor-sync`. Rule: `rules/token-discipline.mdc`.
+
+| Hook | Behavior |
+|------|----------|
+| `beforeSubmitPrompt` | Detect advisory / docs / vendor intent → inject readonly + budget |
+| `subagentStop` | Checkpoint + compress HANDOFF reminder |
+| `sessionStop` | Suggest `distill-learning-journal.sh` |
+
+Meta recipes: `advisory-only`, `vendor-sync`, `docs-touch` — see ENGINEERING-RECIPES.md.
 
 ## 8. Rules for Future Agents
 

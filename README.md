@@ -1,6 +1,6 @@
 # SpecForge Engineering Team
 
-**SpecForge** is an installable spec-driven engineering team for **Cursor**, **Claude Code**, **Codex CLI**, and **OpenCode**: 20 agents, 15 skills (9 spec + 6 ponytail), checkpoint hooks (Cursor), project memory, and a bootstrap template.
+**SpecForge** is an installable spec-driven engineering team for **Cursor**, **Claude Code**, **Codex CLI**, and **OpenCode**: 20 agents, 19 skills, 5 checkpoint hooks (Cursor), project memory, and a bootstrap template.
 
 > Specs are source of truth. Chat is ephemeral. Memory learns on disk.
 
@@ -77,12 +77,24 @@ Build a [your app — 2–5 sentences].
 | Component | Count | Purpose |
 |-----------|-------|---------|
 | **Agents** | 20 | Orchestrator, analysts, implementers, QA, reviewers, verifier, challenger |
-| **Spec skills** | 9 | Pipeline, recipes, handoffs, memory, REQ/ARCH, challenger, verifier, drift |
+| **Spec skills** | 13 | Pipeline, recipes, handoffs, memory, metrics, advisory, token budget, vendor sync |
 | **Ponytail skills** | 6 | Minimal code ladder, diff/repo bloat review, debt ledger ([upstream](https://github.com/DietrichGebert/ponytail)) |
-| **Rules** | 3 | Spec gates, agent memory, ponytail (Cursor) |
+| **Rules** | 4 | Spec gates, agent memory, ponytail, token discipline (Cursor) |
 | **Commands** | 3 | `/spec-pipeline`, `/eng-orchestrator`, `/bootstrap-spec-project` |
-| **Hooks** | 4 | Session context, gate checkpoint, learning journal, session-end (Cursor) |
-| **Docs** | 6 | Playbook, recipes, bootstrap, executive summary, multi-tool, roadmap |
+| **Hooks** | 5 | sessionStart, beforeSubmitPrompt, subagentStop, afterFileEdit, stop |
+| **Docs** | 7 | Playbook, recipes, bootstrap, executive summary, multi-tool, roadmap, **metrics** |
+
+## Release efficiency (tokens & KPIs)
+
+Exact per-subagent tokens are **not** exposed by Cursor hooks today. SpecForge uses **three tiers** (see [`docs/ENGINEERING-METRICS.md`](docs/ENGINEERING-METRICS.md)):
+
+1. **Billing export** — ground truth when available  
+2. **Session ledger** — `subagentStop` hook → `.agents/memory/_project/metrics/session.jsonl`  
+3. **Heuristic estimate** — `bash scripts/estimate-pipeline-tokens.sh greenfield-feature --tier 1`
+
+At release: `bash scripts/collect-release-metrics.sh --since v1.2.0` → skill **`spec-release-metrics`** → `.specs/metrics/releases/REL-*.yaml`
+
+**Token discipline:** skills `spec-advisory`, `spec-token-budget` · meta recipes `advisory-only`, `vendor-sync`, `docs-touch` · `bash scripts/distill-learning-journal.sh` weekly
 
 ## Ponytail (minimal code)
 

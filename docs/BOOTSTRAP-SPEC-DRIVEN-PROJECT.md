@@ -241,6 +241,8 @@ Before next agent: persist specs + `specs-index.md` + orchestrator memory → de
 1. `spec-guardian` drift check
 2. `challenger` on material ARCH changes
 3. Update `CHANGELOG.md` under `.specs/`
+4. **Efficiency scorecard:** `bash scripts/collect-release-metrics.sh --since <prev-tag>` · skill `spec-release-metrics` → `.specs/metrics/releases/REL-*.yaml` (see `ENGINEERING-METRICS.md`)
+5. **Journal distill:** `bash scripts/distill-learning-journal.sh` (keeps sessionStart input small)
 
 ### Per day (you)
 

@@ -6,10 +6,10 @@ Last updated: 2026-07-01
 
 | Platform | Install | Agents | Skills | Hooks | Ponytail |
 |----------|---------|--------|--------|-------|----------|
-| **Cursor** | `scripts/install.sh` | 20 (plugin) | 15 | 4 | rule + skills |
-| **Claude Code** | `scripts/install-claude.sh` | 20 | 15 | — | skills |
-| **Codex CLI** | `scripts/install-codex.sh` | via AGENTS.md | 15 | — | skills |
-| **OpenCode** | `scripts/install-opencode.sh` | 20 | 15 | — | skills |
+| **Cursor** | `scripts/install.sh` | 20 (plugin) | 19 | 5 | rule + skills |
+| **Claude Code** | `scripts/install-claude.sh` | 20 | 19 | — | skills |
+| **Codex CLI** | `scripts/install-codex.sh` | via AGENTS.md | 19 | — | skills |
+| **OpenCode** | `scripts/install-opencode.sh` | 20 | 19 | — | skills |
 
 **Ponytail** (vendored from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail), MIT):
 
@@ -17,6 +17,19 @@ Last updated: 2026-07-01
 - Cursor always-on rule: `rules/ponytail.mdc` (bootstrapped into projects)
 - Refresh: `bash scripts/sync-ponytail.sh`
 - Gate 3: `ponytail-review` runs parallel with `code-reviewer` and `security-reviewer`
+
+**Release metrics** (Tier 2+): `ENGINEERING-METRICS.md` · `collect-release-metrics.sh` · `estimate-pipeline-tokens.sh` · skill `spec-release-metrics`
+
+**Token discipline** (P0–P3 shipped):
+
+| Item | Location |
+|------|----------|
+| P0 `spec-advisory` + `spec-token-budget` | skills + `rules/token-discipline.mdc` |
+| P0 `beforeSubmitPrompt` hook | `hooks/scripts/prompt-intent.sh` |
+| P1 meta recipes | `advisory-only`, `vendor-sync`, `docs-touch` in ENGINEERING-RECIPES.md |
+| P1 `spec-vendor-sync` | skill + `sync-ponytail.sh` |
+| P2 subagentStop compression nudge | `hooks/scripts/subagent-stop.sh` |
+| P3 journal distill | `scripts/distill-learning-journal.sh` |
 
 ---
 
@@ -84,9 +97,10 @@ Questions: open a GitHub issue with label `platform`.
 | Priority | Item | Description |
 |----------|------|-------------|
 | **1** | **`install-copilot.sh`** | GitHub Copilot — agents, skills, bootstrap (Phase 2) |
-| 2 | Hook parity | Codex / OpenCode lifecycle hooks matching Cursor gate semantics |
-| 3 | `simplicity-reviewer` agent | Optional Gate 3 agent (readonly) — or rely on `ponytail-review` skill |
-| 4 | Ponytail auto-sync | CI check that `vendor/ponytail/VERSION` matches upstream tag |
+| 2 | Release metrics dashboard | Optional viz over `.specs/metrics/releases/` |
+| 3 | Hook parity | Codex / OpenCode lifecycle hooks matching Cursor gate semantics |
+| 4 | Billing CSV ingest | Auto-fill Tier A token totals in release YAML |
+| 5 | Ponytail auto-sync | CI check that `vendor/ponytail/VERSION` matches upstream tag |
 
 ---
 

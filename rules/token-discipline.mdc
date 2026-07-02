@@ -1,0 +1,34 @@
+---
+description: Token discipline — advisory detection, output budgets, verdict-first replies
+alwaysApply: true
+---
+
+# Token discipline
+
+Apply skills **`spec-token-budget`** and **`spec-advisory`** when the task is review-only.
+
+## Advisory triggers (readonly)
+
+If the user asks to **review**, **compare**, **should we**, **worth it**, **feasibility**, **critical review**, **analyze options**, or **ask mode**:
+
+- Do **not** edit files unless they explicitly say **implement**, **apply**, **build**, or **commit**.
+- Output: verdict (3 bullets) → gap table → one next step.
+- Budget: **advisory** profile (≤800 words).
+
+## After advisory
+
+Implementation belongs in a **new chat** with paths only — not the same thread.
+
+## Input hygiene
+
+- Prefer spec/memory **paths** over chat replay.
+- Raw git URLs for upstream skills — not HTML scrapes.
+- Large command output: context-mode / subagent — not parent chat.
+
+## Docs-only edits
+
+README, ROADMAP, `docs/*` only → profile **docs-touch**; no codebase search unless asked.
+
+## Vendor sync
+
+Run `bash scripts/sync-*.sh`; follow skill **`spec-vendor-sync`**.

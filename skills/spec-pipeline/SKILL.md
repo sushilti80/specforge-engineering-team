@@ -93,3 +93,7 @@ Then: `/eng-orchestrator Build [app description]; run full spec pipeline from RE
 | `ponytail-review` | Diff audit for over-engineering (Gate 3) |
 | `ponytail-audit` | Repo-wide bloat audit (maintenance recipe) |
 | `ponytail-debt` | Harvest `ponytail:` deferred shortcuts |
+| `spec-release-metrics` | Release YAML — tokens (est.), subagent counts, quality KPIs |
+| `spec-advisory` | Readonly review / compare / feasibility |
+| `spec-token-budget` | Output caps by task profile |
+| `spec-vendor-sync` | Third-party skill sync checklist |

@@ -47,6 +47,7 @@ def main() -> None:
     msg = (
         "Session ending after recent spec/memory edits. "
         "Distill learning-journal entries into `.agents/memory/*/MEMORY.md` "
+        "(run: `bash scripts/distill-learning-journal.sh`) "
         "and update `specs-index.md`. Then start a fresh chat for the next gate if context is stale."
     )
     print(json.dumps({"followup_message": msg}))

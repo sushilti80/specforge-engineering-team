@@ -23,6 +23,9 @@ Full definitions: `SPECFORGE_HOME/ENGINEERING-RECIPES.md`
 | `infra-change` | Terraform, CI/CD, K8s |
 | `spec-only` | REQ/ARCH only, no code |
 | `security-patch` | CVE / security finding |
+| `advisory-only` | Review/feasibility — readonly (meta) |
+| `vendor-sync` | Sync third-party skills (meta) |
+| `docs-touch` | README/docs only (meta) |
 
 ## Invoke
 

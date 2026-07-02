@@ -8,7 +8,7 @@ model: inherit
 ---
 
 ## Skills
-Apply: **`spec-pipeline`**, **`spec-recipes`**, **`spec-handoff`**, **`spec-agent-memory`**. Recipes: `SPECFORGE_HOME/ENGINEERING-RECIPES.md`.
+Apply: **`spec-pipeline`**, **`spec-recipes`**, **`spec-handoff`**, **`spec-agent-memory`**, **`spec-token-budget`**. For review/feasibility prompts: **`spec-advisory`** (readonly until user says implement). Recipes: `SPECFORGE_HOME/ENGINEERING-RECIPES.md`.
 
 ## Agent memory (per project)
 At start: read `.agents/memory/_project/MEMORY.md` and `eng-orchestrator/MEMORY.md` (alias: `.cursor/agent-memory/`).
@@ -30,7 +30,8 @@ Before delegating to the next gate—or recommending a new parent chat:
 ## Delegation rules (token + anti-rot)
 
 - Delegation prompt **≤500 words**, **mostly file paths**
-- Pass: `Recipe`, `Tier`, `Phase`, spec paths, blockers
+- Apply **`spec-token-budget`** profile: `handoff` for delegation, `advisory` for review-only
+- Pass: `Recipe`, `Tier`, `Phase`, spec paths, blockers, `Token profile: [name]`
 - **Do not paste** prior subagent prose, HANDOFF narratives, or tool logs
 - **Fresh subagent** at each gate boundary (do not resume across REQ→implement→verify)
 - **Do not resume** implementer for verifier/challenger roles
@@ -71,7 +72,10 @@ Read `SPECFORGE_HOME/ENGINEERING-RECIPES.md` and pick one recipe. State it in ch
 | upgrade / refactor / tech debt | `maintenance` |
 | terraform / CI / k8s | `infra-change` |
 | requirements or design only | `spec-only` |
-| CVE / vulnerability | `security-patch` |
+| "CVE / vulnerability" | `security-patch` |
+| review / compare / should we / feasibility | `advisory-only` |
+| sync upstream / vendor / ponytail pull | `vendor-sync` |
+| README / ROADMAP / docs only | `docs-touch` |
 
 If unclear, ask: **"New capability, defect, or maintenance?"**
 

@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 """Remind orchestrator to checkpoint after spec-team subagents complete."""
 import json
+import os
 import sys
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
+
+from metrics_ledger import log_subagent_complete  # noqa: E402
 
 SPEC_AGENTS = {
     "requirements-analyst",
@@ -41,6 +48,8 @@ def main() -> None:
         print("{}")
         return
 
+    log_subagent_complete(data)
+
     modified = data.get("modified_files") or []
     spec_touch = any(
         ".specs/" in p or "agent-memory" in p or ".agents/memory/" in p for p in modified
@@ -56,6 +65,11 @@ def main() -> None:
     )
     if spec_touch:
         msg += " Spec or memory files were modified — confirm learning-journal and HANDOFF memory paths."
+
+    msg += (
+        " Token: if HANDOFF or last response is long, compress to ≤500 words paths-only "
+        "(skill spec-token-budget, profile handoff) before delegating."
+    )
 
     print(json.dumps({"followup_message": msg}))
 

@@ -42,6 +42,9 @@ def main() -> None:
         "At gate boundaries: update specs-index.md, agent MEMORY.md, optional `.specs/handoffs/GATE-*.md`.",
         "Delegate with file paths only (≤500 words). Fresh subagent per gate.",
         "",
+        "Token discipline: skills `spec-token-budget`, `spec-advisory` for review-only prompts. "
+        "Verdict-first; no file edits on advisory unless user says implement.",
+        "",
         "Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` (Cursor: `~/.cursor/ENGINEERING-PLAYBOOK.md`)",
         "Orchestrator: `/eng-orchestrator` · Pipeline: `/spec-pipeline`",
     ]

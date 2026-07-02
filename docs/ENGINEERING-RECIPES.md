@@ -20,6 +20,28 @@ Or: `Use recipe maintenance to upgrade React 18 → 19`
 | `spec-only` | Requirements or design only | REQ and/or ARCH, no code | Low |
 | `security-patch` | CVE or security finding | BUG or REQ + security-reviewer | Low–medium |
 
+### Meta recipes (harness / token discipline)
+
+No production merge gates. Use to split sessions (Principle 8) and save tokens.
+
+| Recipe ID | When to use | Agents | Edits? |
+|-----------|-------------|--------|--------|
+| `advisory-only` | Review, compare, feasibility, "should we" | Main agent + skill `spec-advisory` | **Readonly** until user says implement |
+| `vendor-sync` | Pull/sync third-party skills | Shell + skill `spec-vendor-sync` | Harness `skills/`, `rules/`, `vendor/` only |
+| `docs-touch` | README, ROADMAP, acknowledgments | Main agent; profile `docs-touch` | `docs/`, `README.md` only |
+
+**Flow after `advisory-only`:** write `.specs/decisions/DEC-NNN.md` if asked → **new chat** with production recipe + paths.
+
+**Invoke:**
+
+```
+/eng-orchestrator recipe: advisory-only — should we add ForgeCode support?
+/eng-orchestrator recipe: vendor-sync — refresh ponytail from upstream
+/eng-orchestrator recipe: docs-touch — update ROADMAP Copilot priority
+```
+
+Skills: `spec-advisory`, `spec-token-budget`, `spec-vendor-sync`.
+
 ---
 
 ## Shared gates (all recipes)
@@ -238,6 +260,9 @@ requirements-analyst → REQ APPROVED
 | "terraform", "pipeline", "deploy", "k8s" | `infra-change` |
 | "write requirements only", "design only" | `spec-only` |
 | "CVE", "vulnerability", "security fix" | `security-patch` |
+| "review", "should we", "compare", "feasibility", "critical review" | `advisory-only` |
+| "sync ponytail", "vendor sync", "pull upstream skill" | `vendor-sync` |
+| "readme", "roadmap", "docs only", "acknowledgments" | `docs-touch` |
 
 When ambiguous, ask one question: **"Is this new capability, a defect, or maintenance?"**
 

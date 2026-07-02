@@ -10,6 +10,7 @@ SPECFORGE_DOCS=(
   SPEC-DRIVEN-EXECUTIVE-SUMMARY.md
   MULTI-TOOL.md
   ROADMAP.md
+  ENGINEERING-METRICS.md
 )
 
 specforge_resolve_root() {

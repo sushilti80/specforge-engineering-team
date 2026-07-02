@@ -32,6 +32,12 @@ Every agent phase that hands off work **must** end with this block (fill all fie
 
 **Checkpoint file:**
 - [.specs/handoffs/GATE-*.md or "none"]
+
+**Token profile:** [advisory | handoff | implement | docs-touch | release]
+
+**Read order (next agent):** [max 3 paths — do not re-read chat]
+
+**Do not carry forward:** [what is now only on disk]
 ---
 ```
 
@@ -41,7 +47,7 @@ Every agent phase that hands off work **must** end with this block (fill all fie
 2. Write optional checkpoint: `.specs/handoffs/GATE-<slug>.md` (see playbook template)
 3. Next agent prompt = **paths + recipe + phase** only—not this HANDOFF prose
 
-Orchestrator: delegation ≤500 words. Do not paste prior agent narratives.
+Orchestrator: delegation ≤500 words. Do not paste prior agent narratives. Apply skill **`spec-token-budget`**.
 
 ## Checkpoint file (orchestrator or phase owner)
 
