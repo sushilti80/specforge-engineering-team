@@ -1,8 +1,8 @@
 # SpecForge Engineering Team
 
-**SpecForge** is an installable spec-driven engineering team for **Cursor**, **Claude Code**, **Codex CLI**, and **OpenCode**: 20 agents, 19 skills, 5 checkpoint hooks (Cursor), project memory, and a bootstrap template.
+**SpecForge** is an installable spec-driven engineering team for **Cursor**, **Claude Code**, **Codex CLI**, and **OpenCode**: 20 agents, 19 skills, 5 checkpoint hooks (Cursor), **token discipline**, **release benchmarking**, project memory, and a bootstrap template.
 
-> Specs are source of truth. Chat is ephemeral. Memory learns on disk.
+> Specs are source of truth. Chat is ephemeral. Memory learns on disk. Tokens are measured, not guessed.
 
 ## Install
 
@@ -55,7 +55,7 @@ See [`docs/MULTI-TOOL.md`](docs/MULTI-TOOL.md) for parity details and per-tool q
 bash scripts/bootstrap-project.sh /path/to/your-app
 ```
 
-Commit `.specs/`, `.agents/memory/`, and `AGENTS.md` to git. Bootstrapped Cursor projects include the **ponytail** always-on rule (minimal code ladder).
+Commit `.specs/`, `.agents/memory/`, and `AGENTS.md` to git. Bootstrapped Cursor projects include **ponytail** and **token-discipline** rules.
 
 ## First prompt
 
@@ -84,17 +84,95 @@ Build a [your app — 2–5 sentences].
 | **Hooks** | 5 | sessionStart, beforeSubmitPrompt, subagentStop, afterFileEdit, stop |
 | **Docs** | 7 | Playbook, recipes, bootstrap, executive summary, multi-tool, roadmap, **metrics** |
 
-## Release efficiency (tokens & KPIs)
+## Token discipline
 
-Exact per-subagent tokens are **not** exposed by Cursor hooks today. SpecForge uses **three tiers** (see [`docs/ENGINEERING-METRICS.md`](docs/ENGINEERING-METRICS.md)):
+Stop **review chats from turning into implement sessions** and cap **output bloat** without cutting spec quality. Token efficiency is a first-class harness feature — not an afterthought.
 
-1. **Billing export** — ground truth when available  
-2. **Session ledger** — `subagentStop` hook → `.agents/memory/_project/metrics/session.jsonl`  
-3. **Heuristic estimate** — `bash scripts/estimate-pipeline-tokens.sh greenfield-feature --tier 1`
+### What it does
 
-At release: `bash scripts/collect-release-metrics.sh --since v1.2.0` → skill **`spec-release-metrics`** → `.specs/metrics/releases/REL-*.yaml`
+| Mechanism | What happens |
+|-----------|----------------|
+| **`rules/token-discipline.mdc`** | Always-on: verdict-first replies, advisory = readonly, paths over chat replay |
+| **`beforeSubmitPrompt` hook** (Cursor) | Detects review / docs / vendor-sync prompts → injects budget + mode |
+| **`spec-advisory`** | Readonly reviews — no file edits unless you say *implement* |
+| **`spec-token-budget`** | Output caps by profile (advisory ≤800w, handoff ≤500w, docs-touch, release) |
+| **Meta recipes** | Split sessions like Principle 8 — advisory ≠ build |
 
-**Token discipline:** skills `spec-advisory`, `spec-token-budget` · meta recipes `advisory-only`, `vendor-sync`, `docs-touch` · `bash scripts/distill-learning-journal.sh` weekly
+### Meta recipes (save parent context)
+
+| Recipe | Use when | Edits? |
+|--------|----------|--------|
+| `advisory-only` | "Should we…", compare, feasibility, critical review | Readonly |
+| `vendor-sync` | `sync-ponytail.sh`, pull upstream skills | Harness only |
+| `docs-touch` | README, ROADMAP, acknowledgments | Docs only |
+
+**Pattern:** decide in one chat → **new chat** to implement with paths only.
+
+```
+/eng-orchestrator recipe: advisory-only — should we add GitHub Copilot next?
+```
+
+After the verdict, start fresh:
+
+```
+Recipe: greenfield-feature | Tier: 1
+Read: .specs/decisions/DEC-001.md
+Do not use prior chat summaries.
+```
+
+### Hooks & hygiene (Cursor)
+
+| Hook | Token role |
+|------|------------|
+| `beforeSubmitPrompt` | Route advisory / docs / vendor intent |
+| `subagentStop` | Checkpoint + compress HANDOFF + `session.jsonl` metrics |
+| `sessionStart` | Principle 8 + journal tail (≤8 lines) |
+| `stop` | Nudge `distill-learning-journal.sh` |
+
+**Weekly:** `bash scripts/distill-learning-journal.sh` — shrinks sessionStart input over time.
+
+**Complement:** [context-mode](https://github.com/mksglu/context-mode) for sandboxing large tool output (playbook §7). Separate install; recommended for long pipelines.
+
+Skills: `spec-advisory`, `spec-token-budget`, `spec-vendor-sync` · playbook §7
+
+## Release benchmarking
+
+Measure **tokens per REQ**, **subagent activity**, and **quality KPIs** at release — without pretending hooks expose exact billing APIs.
+
+### Three measurement tiers
+
+| Tier | Source | Use for |
+|------|--------|---------|
+| **A — Billing** | Cursor/Codex usage export | Ground truth $ and total tokens |
+| **B — Proxies** | `session.jsonl` + gate files + `ctx stats` | Per-release trends |
+| **C — Heuristics** | `estimate-pipeline-tokens.sh` | Planning, recipe compare (±30–50%) |
+
+### Commands
+
+```bash
+# Heuristic: e.g. greenfield-feature Tier 1 ≈ 188K tokens total
+bash scripts/estimate-pipeline-tokens.sh greenfield-feature --tier 1
+
+# Proxies: subagent counts, git diff, gate checkpoints since last tag
+bash scripts/collect-release-metrics.sh --since v1.2.0
+
+# Scorecard → .specs/metrics/releases/REL-YYYY-MM-DD.yaml (skill spec-release-metrics)
+```
+
+### What gets tracked
+
+| Metric | Why it matters |
+|--------|----------------|
+| **Est. input / output tokens** | Cost per release and per recipe |
+| **Tokens per shipped REQ** | Compare vibe-coded vs spec-driven |
+| **Subagent runs by role** | `subagentStop` → `metrics/session.jsonl` |
+| **Gate checkpoints** | Principle 8 compliance |
+| **context-mode savings ratio** | Effective input reduction |
+| **Verifier gaps + spec drift** | Never optimize tokens without quality |
+
+Tier 2+ ceremony: spec-guardian → collect metrics → write `REL-*.yaml`.
+
+Full framework: [`docs/ENGINEERING-METRICS.md`](docs/ENGINEERING-METRICS.md) · skill **`spec-release-metrics`**
 
 ## Ponytail (minimal code)
 
@@ -120,7 +198,9 @@ Refresh from upstream: `bash scripts/sync-ponytail.sh`
 
 ## Recipes
 
-`new-application` · `greenfield-feature` · `bug-fix` · `hotfix` · `maintenance` · `infra-change` · `spec-only` · `security-patch`
+**Production:** `new-application` · `greenfield-feature` · `bug-fix` · `hotfix` · `maintenance` · `infra-change` · `spec-only` · `security-patch`
+
+**Meta (token discipline):** `advisory-only` · `vendor-sync` · `docs-touch`
 
 See `docs/ENGINEERING-RECIPES.md`.
 
@@ -128,12 +208,13 @@ See `docs/ENGINEERING-RECIPES.md`.
 
 When the Cursor plugin is enabled on a bootstrapped project:
 
-1. **`afterFileEdit`** → logs `.specs/` and memory edits to `learning-journal.md`
-2. **`sessionStart`** → injects Principle 8 context + recent journal
-3. **`subagentStop`** → checkpoint reminder at gate boundaries
-4. **`stop`** → nudges memory distillation
+1. **`sessionStart`** → Principle 8 context + token discipline + recent journal
+2. **`beforeSubmitPrompt`** → advisory / docs / vendor intent routing
+3. **`subagentStop`** → gate checkpoint + HANDOFF compression + `session.jsonl` metrics
+4. **`afterFileEdit`** → logs `.specs/` and memory edits to `learning-journal.md`
+5. **`stop`** → nudges journal distillation + fresh chat for next gate
 
-Other tools: follow the manual checkpoint checklist in `docs/MULTI-TOOL.md`.
+Other tools: follow the manual checkpoint checklist in `docs/MULTI-TOOL.md`; use skills `spec-advisory` and `spec-token-budget` explicitly.
 
 ## Roadmap & community
 
@@ -152,25 +233,22 @@ specforge-engineering-team/
 ├── .cursor-plugin/plugin.json
 ├── agents/
 ├── skills/
-│   ├── spec-*              # 9 spec-driven skills
+│   ├── spec-*              # 13 spec-driven skills (incl. metrics, advisory, token budget)
 │   └── ponytail*           # 6 ponytail skills (synced from upstream)
-├── rules/                  # Cursor plugin rules (+ ponytail.mdc)
+├── rules/                  # spec-driven, agent-memory, ponytail, token-discipline
 ├── commands/
-├── hooks/
+├── hooks/                  # 5 events (incl. beforeSubmitPrompt)
 ├── docs/
-│   └── ROADMAP.md          # platform parity + community contributions
-├── vendor/ponytail/        # upstream attribution (LICENSE, VERSION)
+│   ├── ENGINEERING-METRICS.md   # release benchmarking framework
+│   └── ROADMAP.md
+├── vendor/ponytail/
 ├── templates/
-│   ├── platform/AGENTS.codex.md
-│   └── spec-driven-app/    # bootstrap template (includes ponytail rule)
 └── scripts/
-    ├── install.sh           # Cursor
-    ├── install-claude.sh    # Claude Code
-    ├── install-codex.sh     # Codex CLI
-    ├── install-opencode.sh  # OpenCode
-    ├── install-all.sh       # All supported platforms
-    ├── sync-ponytail.sh     # Refresh ponytail from GitHub
-    ├── lib/specforge-install.sh
+    ├── install*.sh
+    ├── sync-ponytail.sh
+    ├── estimate-pipeline-tokens.sh    # Tier C heuristics
+    ├── collect-release-metrics.sh     # Tier B proxies
+    ├── distill-learning-journal.sh    # shrink sessionStart input
     └── bootstrap-project.sh
 ```
 
