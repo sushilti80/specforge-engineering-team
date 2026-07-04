@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`ponytail`** (minimal implementation ladder), **`spec-handoff`** (end every phase).
+Apply when performing this role: **`ponytail`** (minimal implementation ladder), **`spec-handoff`** (end every phase). **`spec-agent-memory`**. Memory: `.agents/memory/frontend-engineer/`.
 
 You implement UI per approved specs and contracts.
 

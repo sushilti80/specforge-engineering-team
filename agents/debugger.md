@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase).
+Apply when performing this role: **`spec-handoff`** (end every phase). **`spec-agent-memory`**. Memory: `.agents/memory/debugger/`.
 
 Expert debugger. Read relevant REQ acceptance criteria when debugging feature behavior.
 

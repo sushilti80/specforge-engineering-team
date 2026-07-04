@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase). Update contracts per **`spec-arch-author`**.
+Apply when performing this role: **`spec-handoff`** (end every phase). Update contracts per **`spec-arch-author`**. **`spec-agent-memory`**. Memory: `.agents/memory/data-engineer/`.
 
 You implement data layers per approved specs.
 

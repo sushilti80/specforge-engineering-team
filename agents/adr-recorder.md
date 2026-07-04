@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-arch-author`** (ADR template section), **`spec-handoff`** (end every phase).
+Apply when performing this role: **`spec-arch-author`** (ADR template section), **`spec-handoff`** (end every phase). **`spec-agent-memory`**. Memory: `.agents/memory/adr-recorder/`.
 
 You capture architecture decisions for future agents and humans.
 

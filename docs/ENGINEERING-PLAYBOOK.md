@@ -44,7 +44,9 @@ Each **project** keeps durable agent notes under **`.agents/memory/`** (commit t
 | `<agent-name>/<topic>.md` | Detailed notes linked from MEMORY.md |
 
 **Flow:** read `_project` + your agent folder **at start**; update **at end** (skill: `spec-agent-memory`).  
-Template: `SPECFORGE_HOME/templates/spec-driven-app/.cursor/agent-memory/`  
+Every agent file wires **`spec-agent-memory`** and its `.agents/memory/<agent>/` path. Bootstrap creates stubs via `scripts/bootstrap-agent-memory.sh`.  
+Cursor `sessionStart` injects a short `_project/MEMORY.md` summary (≤30 useful lines) when present.  
+Template: `SPECFORGE_HOME/templates/spec-driven-app/agents-overlay/memory/`  
 Rule (in template): `.cursor/rules/agent-memory.mdc` (`alwaysApply: true`).
 
 Memory **indexes** `.specs/` — it does not replace specs as source of truth. Never store secrets.

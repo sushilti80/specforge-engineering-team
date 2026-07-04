@@ -96,7 +96,7 @@ Other recipes use the gates listed in **ENGINEERING-RECIPES.md** (G-spec, G-test
 - **Tier 1:** use REQ + implementer + test-runner + verifier. Challenger is optional unless approval is consequential.
 - **Tier 2:** add architect, challenger, reviewers, and release-level spec-guardian.
 - **Tier 3:** use the full pipeline and full `.specs/` tree.
-- Avoid per-agent memory folders until project memory exceeds roughly 300 lines or multiple agents repeatedly revisit the same domain.
+- Per-agent folders live under `.agents/memory/<agent>/` (bootstrap creates stubs). Keep each `MEMORY.md` ≤200 lines; use topic files for detail.
 
 ## Default recipe: `greenfield-feature`
 

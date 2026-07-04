@@ -5,14 +5,16 @@ alwaysApply: true
 
 # Agent memory (this project)
 
-Persist learnings in **`.agents/memory/`** (version-controlled). Cursor also resolves via `.cursor/agent-memory/` symlink. Skill: **`spec-agent-memory`**.
+Persist learnings in **`.agents/memory/`** (version-controlled). Cursor also resolves via `.cursor/agent-memory/` symlink. Skill: **`spec-agent-memory`**. Every agent role has a folder (created by `scripts/bootstrap-agent-memory.sh`).
 
 ## Start of work
 
 1. Read `.agents/memory/_project/MEMORY.md`
 2. Read `.agents/memory/_project/specs-index.md`
 3. Read `.agents/memory/_project/learning-journal.md` (last 10 entries) if it exists
-4. If you are a named subagent (`/backend-engineer`, `/architect`, etc.), read `.agents/memory/<agent-name>/MEMORY.md`
+4. Read `.agents/memory/<your-agent-name>/MEMORY.md` (create stub if missing)
+
+SessionStart injects a short `_project/MEMORY.md` summary (≤30 useful lines) when present — still read the full file for your role.
 
 ## End of work
 
@@ -22,7 +24,7 @@ Update memory with concise, durable facts:
 - Architecture and module locations discovered
 - Test commands, failure modes, config/env dependencies
 - Recipe used and outcome (`bug-fix`, `maintenance`, …)
-- Blockers and lessons learned
+- Blockers and lessons learned (especially mistakes that could recur)
 
 ## Rules
 

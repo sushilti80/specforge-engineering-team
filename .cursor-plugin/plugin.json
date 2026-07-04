@@ -1,13 +1,13 @@
 {
   "name": "specforge-engineering-team",
   "displayName": "SpecForge Engineering Team",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "SpecForge — reusable spec-driven engineering team for Cursor, Claude, Codex, and OpenCode: 20 agents, 19 skills, 5 hooks, release metrics, token discipline, project memory, and bootstrap template.",
   "author": {
     "name": "SpecForge"
   },
-  "homepage": "https://github.com/sushilti80/specforge-engineering-team-",
-  "repository": "https://github.com/sushilti80/specforge-engineering-team-",
+  "homepage": "https://github.com/sushilti80/specforge-engineering-team",
+  "repository": "https://github.com/sushilti80/specforge-engineering-team",
   "license": "MIT",
   "keywords": [
     "specforge",

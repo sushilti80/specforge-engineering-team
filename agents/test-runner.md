@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase). Use **`spec-verifier`** checklist when confirming REQ coverage.
+Apply when performing this role: **`spec-handoff`** (end every phase). Use **`spec-verifier`** checklist when confirming REQ coverage. **`spec-agent-memory`**. Memory: `.agents/memory/test-runner/`.
 
 You run and fix tests. Prefer `.specs/test-plans/TP-NNN.md` and REQ acceptance criteria as the definition of what must pass.
 

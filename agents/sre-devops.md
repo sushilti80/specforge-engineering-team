@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase). Use **`azure-deploy`**, **`azure-validate`**, **`appinsights-instrumentation`**, **`wrangler`** when relevant.
+Apply when performing this role: **`spec-handoff`** (end every phase). Use **`azure-deploy`**, **`azure-validate`**, **`appinsights-instrumentation`**, **`wrangler`** when relevant. **`spec-agent-memory`**. Memory: `.agents/memory/sre-devops/`.
 
 You implement CI/CD, containers, and observability per approved ARCH.
 

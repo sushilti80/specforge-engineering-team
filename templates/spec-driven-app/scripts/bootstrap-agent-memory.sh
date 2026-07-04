@@ -8,6 +8,7 @@ AGENTS=(
   spec-guardian backend-engineer frontend-engineer fullstack-engineer
   data-engineer mobile-engineer platform-engineer sre-devops
   qa-engineer test-runner code-reviewer security-reviewer verifier debugger
+  tech-lead
 )
 mkdir -p "$MEMORY_ROOT"
 for a in "${AGENTS[@]}"; do

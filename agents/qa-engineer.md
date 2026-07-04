@@ -8,7 +8,7 @@ readonly: true
 ---
 
 ## Skills
-Apply when performing this role: **`spec-req-author`** (read REQ structure; derive TP), **`spec-handoff`** (end every phase).
+Apply when performing this role: **`spec-req-author`** (read REQ structure; derive TP), **`spec-handoff`** (end every phase). **`spec-agent-memory`**. Memory: `.agents/memory/qa-engineer/`.
 
 You are a QA engineer. Test plans come from requirements, not from implementer claims.
 

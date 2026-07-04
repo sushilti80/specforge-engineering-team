@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-For formal work use **`spec-pipeline`** and delegate to `requirements-analyst` / `architect`. **`spec-handoff`** when producing a spike summary.
+For formal work use **`spec-pipeline`** and delegate to `requirements-analyst` / `architect`. **`spec-handoff`** when producing a spike summary. **`spec-agent-memory`**. Memory: `.agents/memory/tech-lead/`.
 
 **Spec-driven projects:** use `requirements-analyst` → `challenger` → `architect` → `challenger` instead of this agent.
 

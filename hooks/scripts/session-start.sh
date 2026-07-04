@@ -4,6 +4,9 @@ import json
 import os
 import sys
 
+# Cap injected MEMORY.md lines (reliability vs tokens).
+MEMORY_SUMMARY_MAX_LINES = 30
+
 
 def resolve_memory_project_dir(cwd: str) -> str | None:
     for rel in (".agents/memory/_project", ".cursor/agent-memory/_project"):
@@ -11,6 +14,30 @@ def resolve_memory_project_dir(cwd: str) -> str | None:
         if os.path.isdir(path):
             return path
     return None
+
+
+def memory_summary_lines(memory_md: str, max_lines: int = MEMORY_SUMMARY_MAX_LINES) -> list[str]:
+    """Return non-empty, non-placeholder lines from MEMORY.md (capped)."""
+    try:
+        with open(memory_md, encoding="utf-8") as f:
+            raw = f.read().splitlines()
+    except OSError:
+        return []
+
+    useful: list[str] = []
+    for line in raw:
+        s = line.strip()
+        if not s or s in {"-", "- **Name:**", "- **Stack:**", "- **Repo layout:**"}:
+            continue
+        # Skip empty template bullets like "- **Recipe:**" with nothing after
+        if s.startswith("- **") and s.endswith(":**"):
+            continue
+        if s.startswith("- **") and s.endswith(":"):
+            continue
+        useful.append(line.rstrip())
+        if len(useful) >= max_lines:
+            break
+    return useful
 
 
 def main() -> None:
@@ -39,6 +66,7 @@ def main() -> None:
         f"- Specs: `{specs_dir}`" if has_specs else "- Specs: (not bootstrapped)",
         f"- Memory: `{memory_dir}`" if has_memory else "- Memory: (not bootstrapped)",
         "",
+        "At start: read `_project/MEMORY.md` + your role `MEMORY.md`. At end: update lessons (skill `spec-agent-memory`).",
         "At gate boundaries: update specs-index.md, agent MEMORY.md, optional `.specs/handoffs/GATE-*.md`.",
         "Delegate with file paths only (≤500 words). Fresh subagent per gate.",
         "",
@@ -49,15 +77,21 @@ def main() -> None:
         "Orchestrator: `/eng-orchestrator` · Pipeline: `/spec-pipeline`",
     ]
 
-    journal = os.path.join(memory_dir, "learning-journal.md") if memory_dir else ""
-    if journal and os.path.isfile(journal):
-        try:
-            with open(journal, encoding="utf-8") as f:
-                tail = f.read().strip().splitlines()[-8:]
-            if tail:
-                lines.extend(["", "### Recent learning journal", *tail])
-        except OSError:
-            pass
+    if memory_dir:
+        memory_md = os.path.join(memory_dir, "MEMORY.md")
+        summary = memory_summary_lines(memory_md)
+        if summary:
+            lines.extend(["", "### Project memory (summary)", *summary])
+
+        journal = os.path.join(memory_dir, "learning-journal.md")
+        if os.path.isfile(journal):
+            try:
+                with open(journal, encoding="utf-8") as f:
+                    tail = f.read().strip().splitlines()[-8:]
+                if tail:
+                    lines.extend(["", "### Recent learning journal", *tail])
+            except OSError:
+                pass
 
     print(json.dumps({"additional_context": "\n".join(lines)}))
 

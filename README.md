@@ -9,7 +9,7 @@
 ### Option A — All platforms (recommended)
 
 ```bash
-git clone https://github.com/sushilti80/specforge-engineering-team-.git
+git clone https://github.com/sushilti80/specforge-engineering-team.git
 cd specforge-engineering-team
 bash scripts/install-all.sh
 ```
@@ -204,11 +204,26 @@ Refresh from upstream: `bash scripts/sync-ponytail.sh`
 
 See `docs/ENGINEERING-RECIPES.md`.
 
+## Persistent agent memory (self-improvement)
+
+Agents learn across conversations via **project-scoped** memory (commit to git):
+
+| Path | Purpose |
+|------|---------|
+| `.agents/memory/_project/MEMORY.md` | Shared stack, conventions (≤200 lines) |
+| `.agents/memory/_project/specs-index.md` | REQ / ARCH / BUG status |
+| `.agents/memory/<agent>/MEMORY.md` | Per-role lessons (all 20 agents) |
+| `.agents/memory/<agent>/<topic>.md` | Deep notes; link from MEMORY.md |
+
+**Flow:** read memory at start → work against `.specs/` → update lessons at end (skill `spec-agent-memory`). Cursor `sessionStart` injects a short `_project/MEMORY.md` summary (≤30 useful lines) so agents see prior learnings without a full file read.
+
+Bootstrap creates stubs: `bash scripts/bootstrap-agent-memory.sh` (also run by `bootstrap-project.sh`).
+
 ## Self-learning (Cursor hooks)
 
 When the Cursor plugin is enabled on a bootstrapped project:
 
-1. **`sessionStart`** → Principle 8 context + token discipline + recent journal
+1. **`sessionStart`** → Principle 8 + token discipline + **project memory summary** + recent journal
 2. **`beforeSubmitPrompt`** → advisory / docs / vendor intent routing
 3. **`subagentStop`** → gate checkpoint + HANDOFF compression + `session.jsonl` metrics
 4. **`afterFileEdit`** → logs `.specs/` and memory edits to `learning-journal.md`

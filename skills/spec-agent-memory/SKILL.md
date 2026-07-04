@@ -12,9 +12,9 @@ Project-scoped memory lives in **`.agents/memory/`** (commit to git for team con
 
 ## At session start
 
-1. Read `.agents/memory/_project/MEMORY.md` (shared context).
+1. Read `.agents/memory/_project/MEMORY.md` (shared context). Cursor may inject a short summary — still open the file if you need full detail.
 2. Read `.agents/memory/_project/specs-index.md` (REQ/ARCH/BUG status).
-3. If you know your agent role (e.g. `backend-engineer`), read `.agents/memory/<agent-name>/MEMORY.md`.
+3. Read `.agents/memory/<agent-name>/MEMORY.md` for your role (e.g. `backend-engineer`). Create the file if missing (`# <role> memory` + `## Lessons`).
 
 ## What to record
 

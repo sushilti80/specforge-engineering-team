@@ -8,7 +8,7 @@ readonly: true
 ---
 
 ## Skills
-Apply when performing this role: **`spec-guardian-drift`** (primary), **`spec-handoff`** (end every phase).
+Apply when performing this role: **`spec-guardian-drift`** (primary), **`spec-handoff`** (end every phase). **`spec-agent-memory`**. Memory: `.agents/memory/spec-guardian/`.
 
 You are the spec guardian. Specs in `.specs/` are the contract; the codebase must match.
 

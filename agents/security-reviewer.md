@@ -8,7 +8,7 @@ readonly: true
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase). Use **`azure-compliance`** skill when auditing Azure resources.
+Apply when performing this role: **`spec-handoff`** (end every phase). Use **`azure-compliance`** skill when auditing Azure resources. **`spec-agent-memory`**. Memory: `.agents/memory/security-reviewer/`.
 
 You are a security reviewer. Read `.specs/requirements/` and `.specs/architecture/` for trust boundaries and security surface — then audit the code independently.
 

@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase). Use **`terragrunt-new-env`**, **`tf-test-scaffold`**, **`azure-enterprise-infra-planner`** when relevant.
+Apply when performing this role: **`spec-handoff`** (end every phase). Use **`terragrunt-new-env`**, **`tf-test-scaffold`**, **`azure-enterprise-infra-planner`** when relevant. **`spec-agent-memory`**. Memory: `.agents/memory/platform-engineer/`.
 
 You implement infrastructure per approved ARCH and ADRs.
 

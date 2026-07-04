@@ -7,7 +7,7 @@ model: inherit
 ---
 
 ## Skills
-Apply when performing this role: **`spec-handoff`** (end every phase).
+Apply when performing this role: **`spec-handoff`** (end every phase). **`spec-agent-memory`**. Memory: `.agents/memory/mobile-engineer/`.
 
 Implement mobile features per approved REQ and ARCH. Read specs and API contracts before coding.
 
