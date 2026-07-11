@@ -292,12 +292,14 @@ All agents live in `SPECFORGE_HOME/agents/` (user-scope, all projects).
 
 ### Implementation agents
 
+Gates are **recipe × tier** (see each agent file and `eng-orchestrator`): REQ `APPROVED` always; ARCH when required. Implementers propose contract diffs — they do not approve specs or replace `verifier`.
+
 | Agent | File | Role | Readonly |
 |-------|------|------|----------|
-| `backend-engineer` | `backend-engineer.md` | APIs, services, DBs — reads REQ + ARCH first | No |
-| `frontend-engineer` | `frontend-engineer.md` | React/Vue/Angular — reads REQ + ARCH first | No |
-| `fullstack-engineer` | `fullstack-engineer.md` | Vertical slice — reads REQ + ARCH first | No |
-| `mobile-engineer` | `mobile-engineer.md` | iOS/Android/RN/Flutter | No |
+| `backend-engineer` | `backend-engineer.md` | API/server — prefer when API/data-only | No |
+| `frontend-engineer` | `frontend-engineer.md` | UI-only when contracts frozen; match repo stack | No |
+| `fullstack-engineer` | `fullstack-engineer.md` | Small vertical slice only; split if large | No |
+| `mobile-engineer` | `mobile-engineer.md` | iOS/Android/RN/Flutter — platform + offline/permissions | No |
 | `data-engineer` | `data-engineer.md` | SQL, ETL, pipelines, warehouses | No |
 
 ### Quality & safety agents
@@ -419,23 +421,27 @@ Do not rely on prior chat summaries.
 
 ### Orchestrator gates (enforced by `eng-orchestrator`)
 
+Gates are **recipe × tier**. See `agents/eng-orchestrator.md` for the authoritative matrix, approval ownership (user approves `APPROVED` / waivers), verifier evidence inputs, and failure transitions. Summary for full-feature recipes (`new-application`, `greenfield-feature`):
+
 ```
-Gate 1: Before architect runs
-  → REQ-NNN.md must have Status: APPROVED
-  → challenger must have run and objections must be resolved
+Gate 1: Before architect (or Tier 1 implementer when ARCH is skipped)
+  → REQ-NNN.md must have Status: APPROVED (user)
+  → challenger objections resolved when challenger ran (optional at Tier 1 unless consequential)
 
 Gate 2: Before any implementer runs
-  → ARCH-NNN.md must have Status: APPROVED
-  → challenger must have run (second time) and objections resolved
+  → If ARCH required (Tier 2–3 always; Tier 1 when schema/API/security/deploy/framework crossed):
+      ARCH-NNN.md Status: APPROVED (user) + challenger objections resolved
+  → Else (Tier 1 ARCH skip): REQ APPROVED is sufficient — do not use a vague "architect or implementer" fork
 
 Gate 3: Before verifier runs
-  → test-runner must have passed
-  → code-reviewer + security-reviewer must have no Critical issues open
+  → test-runner must have passed (report path)
+  → required reviewers must have no Critical issues open (or user waiver on disk)
   → ponytail-review (skill) on diff for Tier 1+ — address delete-list or document waivers
+  → pass verifier: REQ path(s), git SHA (or uncommitted path list), test report, findings/waiver ledger
 
 Gate 4: Before DONE
   → verifier report must show no "Incomplete or broken" items
-  → spec-guardian must show no drift
+  → spec-guardian must show no blocking drift (Tier 2+; when specs/contracts changed)
 ```
 
 ### Parallel-safe workstreams

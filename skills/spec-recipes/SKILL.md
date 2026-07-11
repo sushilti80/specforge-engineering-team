@@ -2,8 +2,9 @@
 name: spec-recipes
 description: >-
   Engineering orchestrator workflow recipes: bug-fix, hotfix, maintenance,
-  infra-change, greenfield-feature, new-application. Use when choosing which
-  pipeline to run for production work.
+  infra-change, greenfield-feature, new-application, spec-only, security-patch,
+  plus meta recipes advisory-only, vendor-sync, docs-touch. Use when choosing
+  which pipeline to run.
 disable-model-invocation: true
 ---
 

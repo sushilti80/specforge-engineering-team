@@ -2,7 +2,7 @@
 
 Upstream: https://github.com/DietrichGebert/ponytail  
 License: MIT (see `LICENSE`)  
-Synced commit: `16f6cbf`
+Synced commit: `40e50d9`
 
 Refresh: `bash scripts/sync-ponytail.sh`
 

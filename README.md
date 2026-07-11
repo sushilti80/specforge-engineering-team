@@ -49,28 +49,93 @@ Agents, skills, and commands install to `~/.config/opencode/`.
 
 See [`docs/MULTI-TOOL.md`](docs/MULTI-TOOL.md) for parity details and per-tool quickstarts.
 
-### Bootstrap a project
+## After install — verify and run
+
+`install-all.sh` does **not** put agents inside a random project folder. It **symlinks** this repo into each tool’s user directory. Agents still live in this repo’s `agents/` folder.
+
+### Where things landed (macOS/Linux)
+
+| Tool | Agents / plugin path |
+|------|----------------------|
+| **Cursor** | `~/.cursor/plugins/local/specforge-engineering-team` → this repo (agents at `.../agents/`) |
+| **Claude Code** | `~/.claude/agents/*.md` (symlinks) |
+| **OpenCode** | `~/.config/opencode/agents/*.md` (symlinks) |
+| **Codex CLI** | No agent files — skills in `~/.agents/skills/`, instructions in `~/.codex/AGENTS.md` |
+
+Quick check:
+
+```bash
+ls -la ~/.cursor/plugins/local/specforge-engineering-team
+ls ~/.cursor/plugins/local/specforge-engineering-team/agents | head
+ls -la ~/.claude/agents | head
+```
+
+You should see arrows (`->`) pointing back into this repo.
+
+### Cursor — enable and smoke-test
+
+1. **Restart Cursor** after install.
+2. **Settings → Plugins** (or Customize) → enable **specforge-engineering-team**.
+3. Open **Agent** chat (not only inline Tab).
+4. Type `/` — you will see **many** names. That is expected:
+   - **Commands** (start here): `/spec-pipeline`, `/eng-orchestrator`, `/bootstrap-spec-project`
+   - **Agents** (roles the orchestrator uses): `/backend-engineer`, `/challenger`, `/verifier`, …
+5. **Do not** run every agent yourself. Start with the orchestrator or pipeline command.
+
+**Minimal smoke test (no app yet):**
+
+```
+/eng-orchestrator
+
+Recipe: advisory-only
+Tier: 0
+
+In one paragraph: what does SpecForge do and which recipe should I use for a new small app?
+```
+
+You should get a short advisory answer (readonly). If the agent runs, install + plugin enable worked.
+
+### Bootstrap a real project (recommended)
+
+Agents are most useful **inside an app repo** with `.specs/` and memory:
 
 ```bash
 bash scripts/bootstrap-project.sh /path/to/your-app
+cd /path/to/your-app
 ```
 
-Commit `.specs/`, `.agents/memory/`, and `AGENTS.md` to git. Bootstrapped Cursor projects include **ponytail** and **token-discipline** rules.
+Commit `.specs/`, `.agents/memory/`, and `AGENTS.md`. Open **that folder** as the Cursor workspace, then run the first prompt below.
 
-## First prompt
+### First prompt (after bootstrap)
 
-**Cursor / OpenCode:**
+**Cursor / OpenCode** — type `/` and pick **`/spec-pipeline`** or **`/eng-orchestrator`**, then paste:
 
 ```
-/spec-pipeline
-
 Tier: 1
 Recipe: new-application
 
 Build a [your app — 2–5 sentences].
 ```
 
-**Codex / Claude:** use the same tier/recipe block — see project `AGENTS.md`.
+The orchestrator picks the next agents (requirements-analyst → challenger → …). You only need to approve gates and answer questions.
+
+| You type | What happens |
+|----------|----------------|
+| `/eng-orchestrator` or `/spec-pipeline` | **Normal entry** — full pipeline |
+| `/requirements-analyst` | Only write/update a REQ (advanced) |
+| `/backend-engineer` | Only implement (needs APPROVED REQ+ARCH) |
+| `/verifier` | Only verify vs REQ |
+
+**Codex / Claude:** same tier/recipe block in chat; act as eng-orchestrator (see project `AGENTS.md`). Claude: agents appear by name under `~/.claude/agents/`.
+
+### If `/` shows agents but nothing useful happens
+
+| Symptom | Fix |
+|---------|-----|
+| Plugin missing in Settings | Re-run `bash scripts/install.sh`, restart Cursor |
+| Agents listed but ignore `.specs/` | Open a **bootstrapped** project folder as the workspace |
+| Wrong project | `cd` to your app, not only the harness `cursorteam` repo |
+| Want install paths only | `ls -la ~/.cursor/plugins/local/specforge-engineering-team` |
 
 ## What's included
 
