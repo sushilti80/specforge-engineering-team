@@ -1,44 +1,47 @@
 ---
 name: spec-verifier
 description: >-
-  Verify implementation against APPROVED REQ specs only. Use after test-runner.
-  Do not use implementer or reviewer handoffs as primary truth.
-paths: .specs/requirements/**
+  Readonly verify implementation against APPROVED REQ (and BUG when in scope).
+  Use after test-runner with SHA + test report paths. Do not use pipeline
+  handoffs as primary truth; do not fix code.
+paths: .specs/requirements/**,.specs/maintenance/**,.specs/contracts/**,.specs/handoffs/**
 ---
 
 # Spec verifier
 
-Epistemic isolation: verify against **REQ + code + tests**, not the pipeline chain.
+Epistemic isolation: verify against **REQ/BUG + code + cited tests**, not the pipeline chain.
 
-## Allowed sources
+## Allowed sources (orchestrator-provided)
 1. `.specs/requirements/REQ-NNN.md` (`Status: APPROVED`)
-2. `.specs/contracts/` (when checking APIs/data)
-3. Codebase and test command output
+2. BUG path for bug-fix/hotfix when listed
+3. `.specs/contracts/` when checking APIs/data
+4. Git SHA or uncommitted path list
+5. Test report path (Gate 3)
+6. Waiver/findings ledger (or none)
+7. ARCH path only if explicitly passed
 
 ## Forbidden as primary truth
-- Implementer HANDOFF blocks
+- Implementer/reviewer/architect HANDOFF prose
 - "Done" claims from any agent
-- Architect or reviewer summaries
 
 ## Checklist
-1. List every acceptance criterion from REQ.
+1. List every in-scope acceptance criterion (and BUG expected behavior).
 2. For each: locate implementation + test (or document gap).
-3. Run tests; note command and result.
-4. Probe edge cases implied by REQ (errors, auth, empty data).
-5. **Fail** if code contradicts REQ even if reviewers approved.
+3. Prefer cited test report; re-run only to confirm — do not edit code.
+4. Probe edge cases implied by REQ (and ARCH only if provided).
+5. **Fail** if code contradicts REQ/BUG even if reviewers approved.
 
 ## Report
 
 ```markdown
-## Verified (passed)
-- [criterion] — evidence
+## Verifier report
+**SHA / paths:** ...
+**Test evidence:** ...
 
-## Incomplete or broken
-- [criterion] — what is missing/wrong
-
-## Recommended follow-ups
+### Verified (passed)
+### Incomplete or broken
+### Recommended follow-ups
+### verify_passed / done_blocked: yes | no
 ```
 
-Set HANDOFF **Blockers** if any criterion unmet.
-
-End with skill `spec-handoff`.
+Set HANDOFF **Blockers** if any in-scope criterion unmet. End with skill `spec-handoff`.

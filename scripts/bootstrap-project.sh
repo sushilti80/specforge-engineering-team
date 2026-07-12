@@ -193,7 +193,8 @@ Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`
 Harness: `specforge-engineering-team`  
 Roadmap (more platforms): `SPECFORGE_HOME/ROADMAP.md`
 
-Start: see project `AGENTS.md` — Tier 1, Recipe `new-application`
+Start: project AGENTS.md — need checklist → smallest recipe × tier → user APPROVED before code.
+First product session often: Tier 1, Recipe new-application (ARCH-000 optional at Tier 1).
 EOF
   echo "  created: .specs/README.md"
 fi
@@ -202,5 +203,22 @@ echo ""
 echo "Done."
 echo "  Memory:  $PROJECT_ROOT/.agents/memory/_project/MEMORY.md"
 echo "  Specs:   $PROJECT_ROOT/.specs/requirements/REQ-001-product-scope.md"
-echo "  Cursor:  /spec-pipeline  |  OpenCode: /spec-pipeline  |  Codex: see AGENTS.md"
+case "$PLATFORM" in
+  cursor)
+    echo "  Next:    Cursor /eng-orchestrator (see AGENTS.md)"
+    ;;
+  codex)
+    echo "  Next:    Codex — paste need/tier block from AGENTS.md (eng-orchestrator)"
+    ;;
+  opencode)
+    echo "  Next:    OpenCode @eng-orchestrator (see AGENTS.md); /spec-pipeline is cheat sheet only"
+    ;;
+  claude)
+    echo "  Next:    Claude — invoke eng-orchestrator with need/tier (see AGENTS.md)"
+    ;;
+  *)
+    echo "  Next:    see AGENTS.md — need checklist → smallest recipe × tier → user APPROVED"
+    ;;
+esac
+echo "  Tip:     commit .agents/memory if using git"
 echo ""

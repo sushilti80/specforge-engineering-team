@@ -4,6 +4,8 @@
 **Version:** 1.0 · May 2026  
 **Companion docs:** `ENGINEERING-PLAYBOOK.md`, harness `agents/`, harness `skills/spec-*/`
 
+> **Status (2026-07-11):** Historical narrative. Operable control plane is now **need → smallest recipe × tier → human APPROVED → ≤2-round anti-loops** — see `ENGINEERING-RECIPES.md` §0 and `agents/eng-orchestrator.md`. Diagrams below that show a mandatory full pipeline are **ceilings**, not defaults. Prefer Tier 1 minimal plans unless risk justifies more.
+
 ---
 
 ## 1. What we are proposing
@@ -41,22 +43,23 @@ A **non-conformist layer** prevents the usual AI failure mode: each agent valida
 ## 3. How the proposed model works (condensed)
 
 ```
-Intent → REQ (draft) → Challenger → REQ (APPROVED)
-      → ARCH + ADRs + contracts (draft) → Challenger → ARCH (APPROVED)
-      → Implement → Test plan → Test run → Review (parallel) 
-      → Verifier (REQ + code only) → Spec guardian → DONE
+Need checklist → smallest recipe × tier (matrix R agents; O only if risk)
+  → author DRAFT → challenger (when R) → **human APPROVED/override**
+  → implementers → test → reviewers (when R) → verifier → guardian (when R)
 ```
+
+Tier 1 capability often: `REQ → user APPROVED → implement → test → verify` (no full team).
 
 **Non-conformist mechanisms**
 
 | Mechanism | Problem it solves |
 |-----------|-------------------|
-| **Challenger (mandatory)** | Specs ship only after ≥2 substantive objections are addressed |
-| **Verifier isolation** | Cannot “verify” from implementer summaries—only REQ + codebase + tests |
-| **Spec-guardian** | Detects drift between specs and code after every change |
-| **HANDOFF blocks** | Structured handoffs; paths to files, not prose chains |
-| **Checkpoint + reset (Principle 8)** | Persist to disk at gates; fresh subagents; paths-only delegation |
-| **Skills + agents** | Agents = roles; skills = templates/checklists (token-efficient) |
+| **Need-based recipes** | Avoids keyword→full-pipeline ceremony |
+| **Challenger (capped, human stop)** | Adversarial review without infinite author loops |
+| **Verifier isolation** | REQ/BUG + SHA + tests — not implementer prose |
+| **Spec-guardian** | Blocking vs advisory drift before DONE |
+| **HANDOFF + agents_planned** | Paths-only delegation; plan discipline on disk |
+| **Checkpoint + reset (Principle 8)** | Fresh subagents; durable specs/memory |
 
 ---
 

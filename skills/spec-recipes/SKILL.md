@@ -1,38 +1,41 @@
 ---
 name: spec-recipes
 description: >-
-  Engineering orchestrator workflow recipes: bug-fix, hotfix, maintenance,
-  infra-change, greenfield-feature, new-application, spec-only, security-patch,
-  plus meta recipes advisory-only, vendor-sync, docs-touch. Use when choosing
-  which pipeline to run.
+  Need-based workflow recipes for eng-orchestrator. Identify need first, build
+  minimal plan from recipe×tier matrix, add agents only when checklist flags
+  risk, adapt mid-flight. Alias capability = greenfield-feature.
 disable-model-invocation: true
 ---
 
 # Spec recipes
 
-Full definitions: `SPECFORGE_HOME/ENGINEERING-RECIPES.md`
+Full definitions: `SPECFORGE_HOME/ENGINEERING-RECIPES.md` (§0 + matrix).
 
-## Quick picker
+## Rules
+1. **No default production recipe** — classify need before selecting.
+2. Build from **minimal + matrix R/O/—**, not from maximal ASCII pipelines.
+3. **Reclassify** when evidence changes; announce before continuing.
+4. HANDOFF must include: `Recipe`, `Tier`, `Need summary`, `Plan (R/O/skipped)`, `Adapt watchers`, `parent_REQ` when relevant.
+5. Conflict with other docs: **recipes omit wins** unless checklist flags risk.
 
-| Recipe | Use for |
-|--------|---------|
-| `greenfield-feature` | New capability (full REQ→ARCH→implement) |
-| `new-application` | New product + ARCH-000 |
-| `bug-fix` | Defect with BUG-NNN + parent REQ |
-| `hotfix` | Urgent minimal fix + backfill |
-| `maintenance` | Deps, refactor, ADR |
-| `infra-change` | Terraform, CI/CD, K8s |
-| `spec-only` | REQ/ARCH only, no code |
-| `security-patch` | CVE / security finding |
-| `advisory-only` | Review/feasibility — readonly (meta) |
-| `vendor-sync` | Sync third-party skills (meta) |
-| `docs-touch` | README/docs only (meta) |
+## Quick picker (after need checklist)
+
+| Need | Recipe |
+|------|--------|
+| Spike / should we | Tier 0 note or `advisory-only` |
+| Docs only | `docs-touch` |
+| Vendor sync | `vendor-sync` |
+| Specs only | `spec-only` |
+| New product | `new-application` |
+| New user-facing capability | `greenfield-feature` (`capability`) |
+| Defect, normal | `bug-fix` |
+| Prod-urgent | `hotfix` |
+| Deps/refactor | `maintenance` |
+| IaC/CI/env | `infra-change` |
+| CVE / security | `security-patch` |
 
 ## Invoke
 
 ```
-/eng-orchestrator recipe: bug-fix — session refresh times out after 30m
-/eng-orchestrator recipe: maintenance — upgrade Node 20 to 22
+/eng-orchestrator — diagnose need, then minimal recipe × tier plan
 ```
-
-Orchestrator must print `Recipe: [id]` in every HANDOFF.

@@ -87,10 +87,9 @@ You should see arrows (`->`) pointing back into this repo.
 ```
 /eng-orchestrator
 
-Recipe: advisory-only
+Need: advisory — what does SpecForge do and which recipe for a new small app?
 Tier: 0
-
-In one paragraph: what does SpecForge do and which recipe should I use for a new small app?
+Suggested recipe: advisory-only
 ```
 
 You should get a short advisory answer (readonly). If the agent runs, install + plugin enable worked.

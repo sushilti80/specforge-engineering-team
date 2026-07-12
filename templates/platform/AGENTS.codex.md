@@ -1,6 +1,7 @@
 # SpecForge Engineering Team (Codex global)
 
-> Specs are source of truth. Chat is ephemeral. Memory learns on disk (Principle 8).
+> Specs are source of truth. Chat is ephemeral. Memory learns on disk (Principle 8).  
+> Control plane: need → smallest recipe × tier → human APPROVED → ≤2-round anti-loops.
 
 ## SPECFORGE_HOME
 
@@ -11,7 +12,7 @@ Resolve playbook and recipes from the first path that exists:
 3. `$HOME/.cursor/` (Cursor install)
 4. `$HOME/.claude/docs/specforge/`
 
-Files: `ENGINEERING-PLAYBOOK.md`, `ENGINEERING-RECIPES.md`, `MULTI-TOOL.md`
+Files: `ENGINEERING-PLAYBOOK.md`, `ENGINEERING-RECIPES.md` **§0**, `MULTI-TOOL.md`
 
 ## Project layout (after bootstrap)
 
@@ -22,13 +23,17 @@ Files: `ENGINEERING-PLAYBOOK.md`, `ENGINEERING-RECIPES.md`, `MULTI-TOOL.md`
 ## Start work
 
 ```
+Need: [capability | bug | hotfix | greenfield product | maintenance | …]
 Tier: [0|1|2|3]
-Recipe: [new-application | greenfield-feature | bug-fix | hotfix | maintenance | infra-change | spec-only | security-patch]
+Suggested recipe: [optional hint — orchestrator may reclassify]
 
 [Describe the work in 2–5 sentences]
+Stop at READY_FOR_APPROVAL — I own Status: APPROVED.
 ```
 
-Act as **eng-orchestrator**: read `SPECFORGE_HOME/ENGINEERING-RECIPES.md`, pick tier and recipe, checkpoint to `.agents/memory/` at each gate.
+Act as **eng-orchestrator**: run need checklist → pick **smallest** recipe × tier from `ENGINEERING-RECIPES.md` §0 → build **agents_planned** from matrix R only → add O only with risk reason → state skipped → checkpoint to `.agents/memory/` at each gate.
+
+**No default production recipe.** Do not run challenger/architect/guardian/security unless matrix R or checklist flags them.
 
 ## Gate checkpoint (mandatory)
 
@@ -36,7 +41,7 @@ Before the next phase:
 
 1. Update `.specs/` files if changed
 2. Update `.agents/memory/_project/specs-index.md`
-3. Update `.agents/memory/eng-orchestrator/MEMORY.md`
+3. Update `.agents/memory/eng-orchestrator/MEMORY.md` (**Active plan**: agents_planned / optional_added / skipped / adapt watchers)
 4. Optionally write `.specs/handoffs/GATE-*.md`
 
 Delegate with **file paths only** (≤500 words). Do not paste prior agent prose.
@@ -45,11 +50,15 @@ Delegate with **file paths only** (≤500 words). Do not paste prior agent prose
 
 Load on demand from `$HOME/.agents/skills/`: `spec-pipeline`, `spec-recipes`, `spec-handoff`, `spec-agent-memory`, and role-specific spec-* skills.
 
-## Default for new apps
+## First new app (typical Tier 1)
 
 ```
+Need: greenfield product — first slice
 Tier: 1
-Recipe: new-application
+→ new-application and/or capability (greenfield-feature)
+→ REQ-001 DRAFT → user APPROVED
+→ ARCH-000 only if durable boundary (API/schema/auth/deploy)
+→ then implementer → test-runner → verifier
 ```
 
-Then run requirements-analyst → challenger → architect → implementers → test-runner → verifier → spec-guardian per recipe gates.
+Do **not** assume full chain (challenger → architect → guardian) at Tier 1.

@@ -72,5 +72,11 @@ def log_subagent_complete(data: dict) -> None:
             "agent": agent,
             "files_modified": len(modified),
             "spec_touch": spec_touch,
+            # Optional enrichment when caller/orchestrator provides them on the hook payload:
+            **{
+                k: data[k]
+                for k in ("recipe", "tier", "phase", "round")
+                if data.get(k) not in (None, "")
+            },
         },
     )

@@ -1,8 +1,10 @@
 # SpecForge roadmap
 
-Last updated: 2026-07-01
+Last updated: 2026-07-11
 
 ## Shipped (supported today)
+
+**Current release:** [v2.0.0](RELEASE-v2.0.0.md) — need-based recipes, human APPROVED gates, ≤2-round anti-loops, Tier-1 ARCH-optional.
 
 | Platform | Install | Agents | Skills | Hooks | Ponytail |
 |----------|---------|--------|--------|-------|----------|

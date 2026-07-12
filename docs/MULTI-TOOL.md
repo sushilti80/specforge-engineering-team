@@ -38,7 +38,7 @@ Agents and skills reference **`SPECFORGE_HOME`** for playbook and recipes. Resol
 | 20 agents | plugin | symlink | symlink | via AGENTS.md + skills | `.github/agents` |
 | 15 skills (9 spec + 6 ponytail) | plugin | symlink | symlink | `~/.agents/skills` | `.github/skills` |
 | Ponytail minimal-code rule | `rules/ponytail.mdc` | skill only | skill only | skill only | TBD |
-| Slash commands | `/spec-pipeline` | manual | `/spec-pipeline` | prompt in AGENTS.md | custom agents |
+| Slash / entry | `/eng-orchestrator` (pref); `/spec-pipeline` cheat sheet | prompt in AGENTS.md | `@eng-orchestrator` (pref); `/spec-pipeline` cheat sheet | need/tier prompt in AGENTS.md | invoke eng-orchestrator |
 | Hooks / automation | 4 hooks | none | plugins TBD | `.codex` hooks TBD | none |
 | Project memory | `.agents/memory/` | same | same | same | same |
 | Spec gates | rules + AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md |
@@ -62,34 +62,35 @@ Cursor also loads **`rules/ponytail.mdc`** (always-on). Bootstrapped projects co
 ### Cursor
 
 ```
-/spec-pipeline
+/eng-orchestrator
 
 Tier: 1
-Recipe: new-application
 
 Build a [your app — 2–5 sentences].
+
+Run need checklist; smallest recipe × tier; minimal agents_planned;
+stop for user APPROVED on REQ before implement.
 ```
+
+`/spec-pipeline` is an entry cheat sheet only — it defers to `ENGINEERING-RECIPES.md` §0.
 
 ### OpenCode
 
-```
-/spec-pipeline
-```
-
-Or invoke `@eng-orchestrator` with tier and recipe in the prompt.
+Prefer `@eng-orchestrator` with need + tier (same block as Cursor). `/spec-pipeline` only as a cheat sheet that defers to recipes §0.
 
 ### Codex CLI
 
 Use the prompt template from project `AGENTS.md` or global `~/.codex/AGENTS.md`:
 
 ```
+Need: [capability | bug | hotfix | greenfield product …]
 Tier: 1
-Recipe: new-application
+Suggested recipe: [or let orchestrator pick from ENGINEERING-RECIPES §0]
 
-Build a [your app — 2–5 sentences].
+[2–5 sentences]. Stop at READY_FOR_APPROVAL — I own Status: APPROVED.
 ```
 
-Act as **eng-orchestrator** — read `SPECFORGE_HOME/ENGINEERING-RECIPES.md`, delegate with file paths only.
+Act as **eng-orchestrator** — need checklist → matrix → HANDOFF with agents_planned.
 
 ### Claude Code
 

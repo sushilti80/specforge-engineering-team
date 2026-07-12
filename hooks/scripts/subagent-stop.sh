@@ -25,6 +25,12 @@ SPEC_AGENTS = {
     "code-reviewer",
     "security-reviewer",
     "test-runner",
+    "platform-engineer",
+    "sre-devops",
+    "debugger",
+    "data-engineer",
+    "mobile-engineer",
+    "adr-recorder",
 }
 
 

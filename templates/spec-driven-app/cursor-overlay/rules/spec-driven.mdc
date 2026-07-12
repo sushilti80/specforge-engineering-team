@@ -1,19 +1,20 @@
 ---
-description: Spec-driven engineering — specs before code, playbook gates
+description: Spec-driven engineering — specs before code, recipe×tier gates
 alwaysApply: true
 ---
 
 # Spec-driven engineering
 
-Follow the team playbook (`SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` or plugin `docs/ENGINEERING-PLAYBOOK.md`).
+Follow `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` and **`ENGINEERING-RECIPES.md` §0** (need → smallest recipe × tier → adapt).
 
-1. **No production code** for a feature until `REQ-NNN` and `ARCH-NNN` are `Status: APPROVED` and challenger objections are resolved.
-2. **Primary sources:** read `.specs/` files; do not rely on chat summaries as truth.
-3. **Pipeline:** requirements-analyst → challenger → architect → challenger → implement → qa-engineer → test-runner → reviewers → verifier → spec-guardian.
-4. **Orchestrate** multi-step work with `/eng-orchestrator`.
-5. **Update contracts** in `.specs/contracts/` when APIs or models change.
-6. **ADRs** are append-only; supersede with new ADR files.
-7. **Agent memory:** read/update `.agents/memory/` per `agent-memory.mdc` and skill `spec-agent-memory`.
-8. **Principle 8:** checkpoint specs + memory to disk before gate transitions; delegate with paths only; fresh subagent per gate.
+1. **Orchestrate** with `/eng-orchestrator`. No default full-agent pipeline.
+2. **Human APPROVED:** agents leave REQ/ARCH as `DRAFT` (or `READY_FOR_APPROVAL`). Only the user sets `Status: APPROVED`. Do not implement gated work while DRAFT.
+3. **Tier 1 features:** REQ `APPROVED` required before implementers. ARCH only if a durable boundary is crossed (schema, public API, security, deploy, framework) or tier ≥ 2.
+4. **Tier 2–3:** follow recipe×tier matrix (architect, challenger, reviewers, guardian as **R**).
+5. **Primary sources:** `.specs/` files — not chat summaries.
+6. **Contracts** under `.specs/contracts/` when APIs/models change (proposals until accepted).
+7. **ADRs** append-only; supersede with new files.
+8. **Agent memory:** `.agents/memory/` (`spec-agent-memory`). Orchestrator must persist `agents_planned` / skipped.
+9. **Principle 8:** checkpoint specs + memory before gate transitions; paths-only delegation; fresh subagent per gate.
 
-When starting a new feature, ask which REQ/ARCH IDs apply or create them first.
+When starting work: run the need checklist, then ask which REQ/ARCH/BUG IDs apply or create them first.

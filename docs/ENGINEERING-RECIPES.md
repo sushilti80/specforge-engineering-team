@@ -1,286 +1,301 @@
 # Engineering orchestrator — workflow recipes
 
-Recipes are **named flows** the `eng-orchestrator` selects by work type. Each recipe lists agents, gates, and which spec artifacts are required.
+Recipes are **named process budgets**. The `eng-orchestrator` must **identify need first**, start from the **minimal required plan** for that recipe × tier, **add** agents only when the checklist demands them, then **adapt** if evidence changes.
 
-**Invoke:** `/eng-orchestrator [recipe: bug-fix] Fix login timeout on session refresh`  
-Or: `Use recipe maintenance to upgrade React 18 → 19`
+Authoritative approvals/loops: `agents/eng-orchestrator.md` + `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`.  
+This file owns: **when** to use each recipe, **recipe × tier required/optional/skip**, and **reclassification**.
+
+**Conflict rule:** On recipe vs matrix conflict, **omit/skip in this file wins** unless the need checklist explicitly flags risk (contracts, auth, PII, prod-urgent, CVE). Do not “stricter = more agents.”
+
+**Invoke:** `/eng-orchestrator Fix login timeout on session refresh`  
+(Optional hint: `recipe: bug-fix` — orchestrator may still reclassify after need check.)
+
+**Alias:** `capability` / `feature-change` = `greenfield-feature` (prefer saying “capability recipe” in chat; keep ID `greenfield-feature` for compatibility).
+
+---
+
+## 0. Identify need → choose → adapt (mandatory)
+
+Do **not** keyword-map the first verb to a recipe.
+
+### Step A — Need checklist
+
+| Dimension | Ask | How it steers |
+|-----------|-----|----------------|
+| Intent | Ship fix, add capability, change platform, decide, docs, sync? | Primary recipe family |
+| Urgency | Prod-down / data loss / active exploit? | `hotfix` / `security-patch` only if yes |
+| Capability | New user-facing capability (not just copy/error-string polish)? | yes → capability recipe; tiny UX polish may stay bug/maintenance |
+| Contracts | Schema, public API, auth, deploy topology change? | Add ARCH/ADR; raise tier |
+| Novelty | New product vs existing app vs new module/service in monorepo? | `new-application` vs capability; monorepo module still capability/maintenance by behavior |
+| Knowledge | Known defect vs discovery? | bug/hotfix vs advisory/spec-only |
+| Scope | Code / specs only / infra only / docs only? | Constrains recipe |
+| Parent REQ | Does a parent REQ exist for this behavior? | If missing → stub / BUG-scoped verify / escalate (see § Missing parent REQ) |
+
+If ambiguous, ask **at most two**:
+1. **"Ship a fix, add a capability, change platform, or decide/docs only?"**
+2. **"Prod-urgent / security-urgent, or normal priority?"**
+
+### Step B — Smallest matching recipe
+
+| Need | Recipe ID | Notes |
+|------|-----------|-------|
+| Spike / research, no ship | Tier 0 note or `advisory-only` | No fake APPROVED |
+| Readonly review / should we | `advisory-only` | New chat to implement |
+| Docs only | `docs-touch` | |
+| Vendor/skill sync | `vendor-sync` | |
+| Specs only | `spec-only` | |
+| New product | `new-application` | Then capability recipe for first slice |
+| New user-facing capability | `greenfield-feature` (`capability`) | Start minimal; add by tier |
+| Defect, normal priority | `bug-fix` | |
+| Prod-urgent break | `hotfix` | Downgrade if not urgent |
+| Deps/refactor, no new capability | `maintenance` | |
+| IaC/CI/env/observability | `infra-change` | |
+| CVE / security finding | `security-patch` | |
+
+**No default production recipe.**
+
+### Step C — Recipe × tier matrix (operable)
+
+Legend: **R** = required · **O** = optional (add if checklist flags risk) · **—** = skip
+
+| Recipe \\ Tier | Analyst/ADR | Challenger | Architect | Implementer* | QA TP | Test-runner | Code-review | Security | Verifier | Guardian |
+|----------------|-------------|------------|-----------|--------------|-------|-------------|-------------|----------|----------|----------|
+| `greenfield-feature` T1 | R (REQ) | O | O† | R | O | R | O | O | R | O |
+| `greenfield-feature` T2 | R | R | R | R | R | R | R | O‡ | R | R |
+| `greenfield-feature` T3 | R | R | R | R | R | R | R | R | R | R |
+| `bug-fix` T1 | — | — | — | R | — | R | R | O‡ | R | O§ |
+| `bug-fix` T2–3 | O¶ | O¶ | — | R | O | R | R | O‡ | R | O§ |
+| `hotfix` any | — | — | — | R | — | R | O# | O‡ | R | O§ |
+| `maintenance` T1 | R (ADR) | O | O | R | — | R | O | O‡ | R | O§ |
+| `maintenance` T2–3 | R | O¶ | O | R | — | R | R | O‡ | R | R |
+| `infra-change` T1 | R (ADR/ARCH brief) | O | O | platform and/or sre | — | R | O | O‡ | R | O§ |
+| `infra-change` T2–3 | R | R | R | platform → sre | — | R | O | R | R | R |
+| `security-patch` any | O¶ | O¶ | — | R | — | R | O | R | R | O§ |
+| `spec-only` any | R | O/R** | O | — | — | — | — | — | — | — |
+| `new-application` T1 | R (REQ-001) | O | O† (ARCH-000) | via follow-on capability | — | when coding | when coding | when coding | when coding | when coding |
+| `new-application` T2–3 | R | R | R (ARCH-000) | via follow-on capability | — | when coding | when coding | when coding | when coding | when coding |
+
+\* Route implementer by surface (backend/frontend/mobile/data/fullstack/platform/sre).  
+† ARCH required at T1 only if durable boundary (schema/API/security/deploy/framework).  
+‡ Security if auth/PII/crypto/network/IAM/trust boundary touched.  
+§ Guardian if specs/contracts changed or Tier 2+ release.  
+¶ If REQ/acceptance criteria change → analyst + challenger + **user APPROVED**.  
+# Hotfix: code-reviewer optional pre-merge; if skipped, **human ACK on disk** or post-merge review within **48h** (same backfill window).  
+\*\* Challenger required before user APPROVED when recipe uses challenger; Tier 1 consequential approvals should still challenge.
+
+### Step D — Adapt mid-flight
+
+Announce recipe/tier change in chat + memory **before** continuing. Restart from earliest invalidated gate.
+
+| Evidence | Action |
+|----------|--------|
+| Hotfix but not prod-impacting | → `bug-fix` |
+| Bug changes API/schema/arch **without** new user capability | → `maintenance` |
+| Bug/change adds **new user capability** | → `greenfield-feature` |
+| Feature has no real capability (polish only) | → `maintenance` or `bug-fix` |
+| Refactor adds user capability | → `greenfield-feature` |
+| Defect is CVE / active vuln | → `security-patch` |
+| Feature needs new env/IAM/cluster | Primary capability + `infra-change` add-on (checkpoint between) |
+| Spec ambiguity root cause | Pause; analyst / adr-recorder / user |
+| Advisory says build | **New chat** + production recipe + paths (if user insists same chat: checkpoint + re-run §0, still human APPROVED) |
+| Risk higher (PII, payments, multi-service) | Promote tier; add O→R agents per matrix |
+| No parent REQ for bug/hotfix | See **Missing parent REQ** below |
+
+### Missing parent REQ
+
+For `bug-fix` / `hotfix` when no parent REQ exists:
+
+1. Prefer create stub REQ via `requirements-analyst` (DRAFT→user APPROVED) if behavior should become durable, **or**
+2. BUG-only verify: verifier uses BUG acceptance + critical path; HANDOFF `parent_REQ: none — BUG-scoped`, **or**
+3. Escalate to user to choose (1) or (2).
+
+Do not invent product behavior in code to compensate for missing REQ.
+
+### Composition
+
+One primary recipe. Second recipe only when surfaces separate (capability + infra). Checkpoint between. Gates apply per surface from the matrix.
 
 ---
 
 ## Recipe index
 
-| Recipe ID | When to use | Spec depth | Typical lead time |
-|-----------|-------------|------------|-------------------|
-| `new-application` | Greenfield product | Full REQ-001 + ARCH-000 | High |
-| `greenfield-feature` | New capability in existing app | Full REQ + ARCH | High |
-| `bug-fix` | Defect in production or QA | Light (BUG + REQ link) | Low–medium |
-| `hotfix` | Urgent production defect | Minimal BUG + parent REQ | Low |
-| `maintenance` | Deps, refactors, tech debt | ADR or ARCH delta | Medium |
-| `infra-change` | Terraform, CI/CD, K8s | ARCH/ADR + platform | Medium |
-| `spec-only` | Requirements or design only | REQ and/or ARCH, no code | Low |
-| `security-patch` | CVE or security finding | BUG or REQ + security-reviewer | Low–medium |
+| Recipe ID | Aliases | When | Weight |
+|-----------|---------|------|--------|
+| `new-application` | | New product | High |
+| `greenfield-feature` | `capability`, `feature-change` | New user-facing capability | Ceiling high; start minimal |
+| `bug-fix` | | Defect, normal priority | Low–medium |
+| `hotfix` | | Prod-urgent defect | Low |
+| `maintenance` | | Deps/refactor, no new capability | Medium |
+| `infra-change` | | Platform/CI/env/observability | Medium |
+| `spec-only` | | Specs without code | Low |
+| `security-patch` | | CVE / security finding | Low–medium |
 
-### Meta recipes (harness / token discipline)
+### Meta recipes
 
-No production merge gates. Use to split sessions (Principle 8) and save tokens.
-
-| Recipe ID | When to use | Agents | Edits? |
-|-----------|-------------|--------|--------|
-| `advisory-only` | Review, compare, feasibility, "should we" | Main agent + skill `spec-advisory` | **Readonly** until user says implement |
-| `vendor-sync` | Pull/sync third-party skills | Shell + skill `spec-vendor-sync` | Harness `skills/`, `rules/`, `vendor/` only |
-| `docs-touch` | README, ROADMAP, acknowledgments | Main agent; profile `docs-touch` | `docs/`, `README.md` only |
-
-**Flow after `advisory-only`:** write `.specs/decisions/DEC-NNN.md` if asked → **new chat** with production recipe + paths.
-
-**Invoke:**
-
-```
-/eng-orchestrator recipe: advisory-only — should we add ForgeCode support?
-/eng-orchestrator recipe: vendor-sync — refresh ponytail from upstream
-/eng-orchestrator recipe: docs-touch — update ROADMAP Copilot priority
-```
+| Recipe ID | When | Edits? |
+|-----------|------|--------|
+| `advisory-only` | Review/feasibility | Readonly until user says implement |
+| `vendor-sync` | Sync third-party skills | Harness only |
+| `docs-touch` | README/ROADMAP/docs | Docs only |
 
 Skills: `spec-advisory`, `spec-token-budget`, `spec-vendor-sync`.
 
 ---
 
-## Shared gates (all recipes)
+## Shared gates (reference)
 
 | Gate | Meaning |
 |------|---------|
-| **G-spec** | Relevant spec files exist and are not in contradictory DRAFT state |
-| **G-test** | `test-runner` green for scope of change |
-| **G-review** | No open **Critical** from required reviewers |
-| **G-verify** | `verifier` passed against linked REQ (or recipe-specific checklist) |
-| **G-drift** | `spec-guardian` no blocking drift (required before merge for production recipes) |
+| G-spec | Required specs exist; not contradictory DRAFT |
+| G-test | test-runner green for claimed scope (report path) |
+| G-review | No open Critical from **required** reviewers |
+| G-verify | verifier passed in-scope criteria (report + SHA) |
+| G-drift | guardian no Blocking drift |
 
-Full feature gates **G1–G4** from the playbook apply only to `new-application` and `greenfield-feature`.
+Only require gates implied by **R** agents in the matrix. Human owns APPROVED / overrides / waivers. Loops ≤2 rounds.
 
 ---
 
 ## Recipe: `new-application`
 
-**Goal:** Stand up `.specs/` and first production-ready vertical slice.
+**Goal:** Product-scope backbone; first slice via `greenfield-feature` / capability.
 
-```
-1. Scaffold .specs/ (template if missing)
-2. requirements-analyst → REQ-001 product scope (DRAFT)
-3. challenger → objections
-4. requirements-analyst → REQ-001 APPROVED
-5. architect → ARCH-000 system overview (DRAFT)
-6. challenger → objections
-7. architect → ARCH-000 APPROVED + initial ADRs + contracts
-8. [Pick greenfield-feature for first feature REQ-002+]
-```
+**Minimal (Tier 1)**
+1. Scaffold `.specs/` if missing  
+2. REQ-001 DRAFT → challenger only if consequential → **user APPROVED**  
+3. ARCH-000 **optional** unless durable boundary (API/schema/auth/deploy) — same APPROVED rule if present  
+4. Hand off to capability recipe for first coding slice  
 
-**Gates:** G1, G2, G4 (full playbook).
+**Add if Tier 2+ / multi-service:** ARCH-000 required; challenger before APPROVED; fuller ADRs/contracts before slice.
+
+**Adapt:** Discovery only → `spec-only`.
 
 ---
 
-## Recipe: `greenfield-feature` (default)
+## Recipe: `greenfield-feature` (capability)
 
-**Goal:** New feature with full traceability.
+**Goal:** New user-facing capability. **Build plan from matrix row, not from a full pipeline.**
 
-```
-requirements-analyst → REQ (DRAFT)
-challenger
-requirements-analyst → REQ APPROVED
-architect → ARCH + ADRs + contracts (DRAFT)
-challenger
-architect → ARCH APPROVED
-implementers (parallel per ARCH)
-qa-engineer → TP-NNN
-test-runner
-code-reviewer ∥ security-reviewer
-verifier (REQ + code only)
-spec-guardian
-```
+**Minimal (typical Tier 1)**  
+REQ DRAFT → **user APPROVED** → implementer(s) → test-runner → verifier  
 
-**Gates:** G1, G2, G3, G4, G-drift.
+**Add if checklist/tier (in order)**  
+- Challenger before APPROVED when consequential or Tier 2+  
+- Architect + contracts when durable boundary or Tier 2+  
+- QA TP when criteria non-trivial or Tier 2+  
+- code-reviewer Tier 2+ (Tier 1 optional)  
+- security-reviewer if trust boundary  
+- spec-guardian Tier 2+ or contracts/specs changed  
 
-**Skip:** None for production merge.
+**Human:** Approves REQ/ARCH; overrides in Objections resolved / ADR.
 
 ---
 
 ## Recipe: `bug-fix`
 
-**Goal:** Fix a defect; preserve traceability to original requirement.
+**Goal:** Fix defect with durable BUG artifact.
 
-**Spec artifact:** `.specs/maintenance/BUG-NNN-short-title.md` (create folder if needed)
+**Spec:** `.specs/maintenance/BUG-NNN-short-title.md` (include Reproduction, Spec gap?, Parent REQ or `none`).
 
-```markdown
-# BUG-NNN — [title]
-> Status: OPEN | FIXED
-> Parent REQ: REQ-NNN
-> Severity: critical | high | medium | low
+**Minimal**  
+debugger (BUG) → implementer → test-runner → code-reviewer → verifier (REQ+BUG or BUG-scoped)  
 
-## Observed behavior
-## Expected behavior (from REQ acceptance criterion if applicable)
-## Root cause (filled by debugger)
-## Fix scope
-## Regression tests required
-```
+**Add if**  
+- Spec gap → analyst/adr/user (stop inventing behavior)  
+- Auth/PII/trust → security-reviewer  
+- Specs/contracts changed → guardian  
+- Missing parent REQ → § Missing parent REQ  
 
-**Flow:**
-```
-1. debugger → root cause + minimal fix proposal (read parent REQ-NNN)
-2. [If root cause is spec ambiguity] requirements-analyst → patch REQ (minor version bump) OR adr-recorder
-3. implementer (backend/frontend/fullstack as needed)
-4. test-runner → add/run regression tests
-5. code-reviewer (readonly)
-6. [If auth/data/security touched] security-reviewer
-7. verifier → parent REQ-NNN + BUG acceptance + tests (not implementer handoff)
-8. spec-guardian → if contracts or REQ changed
-9. Update BUG status FIXED; note in .specs/CHANGELOG.md
-```
-
-**Gates:** G-spec (parent REQ exists), G-test, G-review (code-reviewer), G-verify, G-drift if specs/contracts touched.
-
-**Skip:** Full ARCH cycle unless fix changes architecture (then use `maintenance` recipe).
-
-**Challenger:** Optional for BUG doc if severity ≤ medium; **required** if REQ patch changes acceptance criteria.
+**Adapt:** no new capability but API/schema/arch → `maintenance`; new capability → `greenfield-feature`; CVE → `security-patch`; prod-down → `hotfix`.
 
 ---
 
 ## Recipe: `hotfix`
 
-**Goal:** Expedited production fix; smallest safe change.
+**Goal:** Prod-urgent minimal fix. **Only if urgency is real.**
 
-**Flow:**
-```
-1. debugger → diagnose + minimal fix
-2. implementer
-3. test-runner → smoke + targeted regression
-4. security-reviewer (if security-adjacent)
-5. verifier → parent REQ + critical path only
-6. spec-guardian (quick drift check)
-7. BUG-NNN or CHANGELOG entry (can be brief)
-```
+**Minimal**  
+debugger → implementer → test-runner (smoke + targeted regression; coverage claim) → verifier  
 
-**Gates:** G-test, G-verify (abbreviated checklist OK).
+**Verify bar (abbreviated):** Map BUG expected behavior + critical user path from parent REQ if any; cite SHA + test report; unmet critical path = fail. Do not claim full REQ coverage.
 
-**Skip:** challenger on new ARCH; full qa-engineer TP unless high risk.
+**Review bar:** Prefer code-reviewer before merge. If skipped for speed: write `hotfix_review: deferred` + human ACK in checkpoint/BUG, and complete code-review (and security if adjacent) within **48h** backfill. Security-reviewer still **R** if security-adjacent before merge when practical; else same 48h + human ACK.
 
-**Post-merge:** Within 48h (human policy), backfill BUG doc and REQ patch if skipped.
+**Add if:** security-adjacent → security-reviewer; specs touched → guardian.
+
+**Adapt:** Not urgent → `bug-fix` immediately. Missing parent REQ → § Missing parent REQ.
+
+**Post-merge 48h:** BUG + CHANGELOG + deferred review + REQ stub/patch if needed.
 
 ---
 
 ## Recipe: `maintenance`
 
-**Goal:** Dependencies, refactors, performance work without new user-facing features.
+**Goal:** Deps/refactor/perf — no new user capability.
 
-**Spec artifact:** ADR and/or ARCH section update; optional `REQ-NNN-maintenance` for large work.
+**Minimal**  
+ADR (or brief ARCH delta) → **user accept** → implementer → test-runner → verifier  
 
-**Flow:**
-```
-1. architect OR adr-recorder → ADR / ARCH delta (DRAFT) describing change + rollback
-2. challenger (required if behavior or contracts may change)
-3. architect → APPROVED / ADR accepted
-4. implementer(s)
-5. test-runner (full suite if dep major version)
-6. code-reviewer ∥ security-reviewer (if deps touch auth/crypto/network)
-7. verifier → ADR acceptance criteria + tests
-8. spec-guardian
-```
+**Add if:** behavior/contracts may change → challenger; Tier 2+ → code-reviewer + guardian; auth/crypto/network deps → security-reviewer.
 
-**Gates:** G-spec, G-test, G-review, G-verify, G-drift.
-
-**Skip:** New REQ unless user-visible behavior changes (then use `greenfield-feature`).
+**Adapt:** New capability appears → `greenfield-feature`. Pure CI/IaC → `infra-change`.
 
 ---
 
 ## Recipe: `infra-change`
 
-**Goal:** IaC, CI/CD, environments, observability.
+**Goal:** IaC / CI / env / observability topology.
 
-**Flow:**
-```
-1. architect → ARCH infra section or ADR (DRAFT)
-2. challenger
-3. architect → APPROVED
-4. platform-engineer
-5. sre-devops → pipeline / deploy / alerts
-6. test-runner → plan/validate/lint per repo
-7. security-reviewer (IAM, secrets, network)
-8. verifier → ARCH infra criteria
-9. spec-guardian
-```
+**Minimal**  
+ARCH/ADR brief → **user APPROVED** → platform and/or sre (by surface) → test-runner (plan/validate/lint) → verifier  
 
-**Gates:** G1-lite (ARCH/ADR approved), G-test, G-review, G-verify, G-drift.
+**Add if:** Tier 2+ → challenger + fuller ARCH + guardian; IAM/secrets/network → security-reviewer; both platform and sre when modules and pipelines both change (platform first).
+
+**Adapt:** App capability dominates → primary `greenfield-feature` + infra add-on.
 
 ---
 
 ## Recipe: `spec-only`
 
-**Goal:** Discovery, REQ/ARCH authoring, no implementation.
+**Minimal**  
+REQ DRAFT → (challenger if consequential/Tier 2+) → **user APPROVED**  
 
-**Flow:**
-```
-requirements-analyst → REQ (DRAFT)
-challenger
-requirements-analyst → REQ APPROVED
-[Optional] architect → ARCH (DRAFT) → challenger → APPROVED
-```
+**Add if:** design needed → ARCH same pattern.
 
-**Gates:** Challenger on each APPROVED artifact.
+**Skip:** implementers/test/verify unless feasibility spike requested.
 
-**Skip:** All implementers, test-runner, verifier (unless user asks for feasibility spike).
+**Adapt:** Implement → new chat + production recipe + paths.
 
 ---
 
 ## Recipe: `security-patch`
 
-**Goal:** CVE, penetration finding, or security regression.
+**Minimal**  
+security-reviewer (scope) → BUG/REQ note → implementer → test-runner → security re-scan → verifier  
 
-**Flow:**
-```
-1. security-reviewer → scope and severity
-2. BUG-NNN or REQ patch
-3. implementer (minimal)
-4. test-runner + security-reviewer (re-scan)
-5. verifier → security acceptance criteria
-6. spec-guardian
-```
+**Add if:** acceptance criteria change → analyst + challenger + user APPROVED; specs/contracts changed → guardian.
 
-**Gates:** G-test, G-review (security-reviewer required), G-verify, G-drift.
-
-**Skip:** challenger on BUG unless REQ acceptance criteria change.
+**Adapt:** Not security → `bug-fix`.
 
 ---
 
-## Orchestrator selection rules
+## Orchestrator output (every selection)
 
-| User intent signals | Recipe |
-|---------------------|--------|
-| "new app", "greenfield", "from scratch" | `new-application` |
-| "feature", "add capability", "build" | `greenfield-feature` |
-| "bug", "fix", "defect", "regression" | `bug-fix` |
-| "hotfix", "production down", "urgent" | `hotfix` |
-| "upgrade", "bump", "refactor", "tech debt" | `maintenance` |
-| "terraform", "pipeline", "deploy", "k8s" | `infra-change` |
-| "write requirements only", "design only" | `spec-only` |
-| "CVE", "vulnerability", "security fix" | `security-patch` |
-| "review", "should we", "compare", "feasibility", "critical review" | `advisory-only` |
-| "sync ponytail", "vendor sync", "pull upstream skill" | `vendor-sync` |
-| "readme", "roadmap", "docs only", "acknowledgments" | `docs-touch` |
+- **Need summary**
+- **Recipe** (+ alias) + **Tier**
+- **Plan:** list **R** agents from matrix; list **O** added and why; list skipped
+- **Next agent** + **gates in force**
+- **Adapt watchers**
+- **parent_REQ:** path | none (BUG-scoped) | stubbing
 
-When ambiguous, ask one question: **"Is this new capability, a defect, or maintenance?"**
-
-Always state in HANDOFF: `**Recipe:** [id]` and `**Next step:** [agent]`.
-
-Update `.cursor/agent-memory/` at recipe start/end (see `spec-agent-memory` skill).
-
-After each gate: **checkpoint to disk** (specs, specs-index, orchestrator memory, optional `.specs/handoffs/`) then **fresh subagent with paths only** — see playbook Principle 8.
+Checkpoint → fresh subagent with paths only (Principle 8).
 
 ---
 
 ## Productionize checklist (per repo)
 
-When a project leaves prototype:
-
-1. [ ] `.specs/` in git
-2. [ ] `.cursor/rules/spec-driven.mdc` (or equivalent)
-3. [ ] Copy `spec-*` skills to `.cursor/skills/` (optional)
-4. [ ] Agree default recipe per work type in team README
-5. [ ] Define hotfix backfill policy
-6. [ ] CI fails if `spec-guardian` reports blocking drift (future automation)
+1. [ ] `.specs/` in git  
+2. [ ] Spec-driven rule enabled  
+3. [ ] Team agrees need → recipe norms (not “always greenfield”)  
+4. [ ] Hotfix 48h backfill + deferred review policy  
+5. [ ] Named humans for APPROVE / waive  

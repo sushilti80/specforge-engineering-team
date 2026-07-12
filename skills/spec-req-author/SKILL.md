@@ -1,8 +1,8 @@
 ---
 name: spec-req-author
 description: >-
-  Write or update REQ specs in .specs/requirements/. Use when creating
-  requirements, acceptance criteria, or moving REQ from DRAFT to APPROVED.
+  Write or update REQ specs in .specs/requirements/. Creates DRAFT REQs and
+  resolves challenger objections. User sets Status: APPROVED — agents must not.
 paths: .specs/requirements/**,.specs/**/REQ-*.md
 ---
 
@@ -14,7 +14,9 @@ Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`
 - REQ specs describe **what**, never **how** (no frameworks, DBs, or microservices in REQ).
 - Every acceptance criterion must be testable (Given / When / Then).
 - Challenge assumptions; document in **Assumptions challenged**.
-- `Status: APPROVED` only after challenger objections are resolved in **Objections resolved**.
+- Keep `Status: DRAFT` until the **user** (or org approver) sets `APPROVED`.
+- After challenger: fill **Objections resolved** (`fixed` | `deferred` | `human override: rationale`). Do **not** flip APPROVED yourself.
+- HANDOFF may say `READY_FOR_APPROVAL` — then **stop** for the user.
 
 ## File location
 `.specs/requirements/REQ-NNN-slug.md`
@@ -39,11 +41,12 @@ Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`
 ## Open questions
 
 ## Objections resolved
-- [Challenger objection] → Resolution: [text]
+- [C1 Blocking] → fixed: [text] | deferred: [why] | human override: [rationale]
 ```
 
-## Before APPROVED
-- All blocking open questions closed.
-- Challenger has reviewed (separate agent/skill `spec-challenger`).
+## Before asking user for APPROVED
+- Blocking open questions closed or deferred with user ack.
+- Challenger has reviewed when recipe/tier requires it (`spec-challenger`).
+- Objection IDs resolved or queued for human override.
 
 End with skill `spec-handoff`.

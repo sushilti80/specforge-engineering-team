@@ -1,7 +1,9 @@
 # Engineering Team Playbook
-> Spec-driven agentic engineering · Non-conformist design · Token efficiency
+> Spec-driven agentic engineering · Non-conformist design · Token efficiency · Human-gated approvals
 >
-> Last updated: 2026-06-20 | **Bootstrap:** `SPECFORGE_HOME/BOOTSTRAP-SPEC-DRIVEN-PROJECT.md` | Agents: harness `agents/` | Spec skills: harness `skills/spec-*/` | Template: harness `templates/spec-driven-app/`
+> Last updated: 2026-07-11 | **Bootstrap:** `SPECFORGE_HOME/BOOTSTRAP-SPEC-DRIVEN-PROJECT.md` | Agents: harness `agents/` | Spec skills: harness `skills/spec-*/` | Template: harness `templates/spec-driven-app/`
+>
+> Authoritative agent contracts live in `agents/*.md`. This playbook must stay aligned with them.
 
 ## SPECFORGE_HOME (multi-tool)
 
@@ -29,6 +31,8 @@ See `SPECFORGE_HOME/MULTI-TOOL.md` for install and parity details.
 6. [Non-Conformist Design](#6-non-conformist-design)
 7. [Token Efficiency Strategy](#7-token-efficiency-strategy)
 8. [Rules for Future Agents](#8-rules-for-future-agents)
+
+Key §5 subsections: [Approval authority](#approval-authority-human-gated), [Challenge / review anti-loops](#challenge--review--drift-anti-loops), [Orchestrator gates](#orchestrator-gates-enforced-by-eng-orchestrator).
 
 ---
 
@@ -60,11 +64,12 @@ Memory **indexes** `.specs/` — it does not replace specs as source of truth. N
 | 1 | **Spec before code** | Every code change must be traceable to a spec change. Code is a consequence of specs, not the source of truth. |
 | 2 | **Specs are the source of truth** | Agents read `.specs/` first, always. Not chat history, not prior agent summaries. |
 | 3 | **Independent epistemics** | Every agent forms its own judgment from primary sources. No agent validates another agent's conclusion — it validates against the spec. |
-| 4 | **Mandatory challenge** | No spec (requirements or architectural) is approved without a `challenger` review first. |
-| 5 | **Verifier reads the spec, not the chain** | The verifier is epistemically isolated from the pipeline. It reads the original REQ spec and the codebase — nothing else. |
+| 4 | **Mandatory challenge + human stop** | When the recipe requires it, no REQ/ARCH is `APPROVED` without challenger output **and** a **human** approve/override/defer. Max 2 challenge rounds; no author↔challenger duel. |
+| 5 | **Verifier reads specs + cited evidence, not the chain** | Verifier is epistemically isolated from implementer/reviewer prose. It consumes orchestrator inputs only: APPROVED REQ (and BUG when in scope), git SHA, Gate 3 test report, waiver ledger, optional ARCH path — then the codebase. |
 | 6 | **Minimal context, maximum signal** | Agents receive only what they need. Large outputs stay in subagent context or are compressed before returning to parent. |
 | 7 | **Right-size the ceremony** | Start with the smallest agent/spec footprint that protects the work. Add roles and gates only when complexity or risk justifies them. |
-| 8 | **Ephemeral chat, durable specs** | Conversation is not source of truth. After each gate, persist state to `.specs/` and `.cursor/agent-memory/`. Next agent gets **file paths + recipe/phase only**—not prior agent narratives. |
+| 8 | **Ephemeral chat, durable specs** | Conversation is not source of truth. After each gate, persist state to `.specs/` and `.agents/memory/` (Cursor: `.cursor/agent-memory/`). Next agent gets **file paths + recipe/phase only**—not prior agent narratives. |
+| 9 | **Stack from specs/repo, not vendor defaults** | Agents must not bind to cloud-vendor skills by default. Match ARCH/repo toolchain; vendor skills only when explicitly in scope. |
 
 ---
 
@@ -76,7 +81,7 @@ The full pipeline below is the **maximum rigor model**, not the default for ever
 
 | Tier | Use when | Agent footprint | Spec footprint |
 |------|----------|-----------------|----------------|
-| **Tier 0 — Spike** | Throwaway prototype or research | Main Agent or one implementer | Notes only |
+| **Tier 0 — Spike** | Throwaway prototype or research | Main Agent (or deprecated `tech-lead` spike note only) | `.specs/spikes/SPIKE-NNN.md` optional; no fake APPROVED |
 | **Tier 1 — Small app** | MVP, solo/low-risk app | `eng-orchestrator`, `requirements-analyst`, implementer, `test-runner`, `verifier` | REQ only; ARCH optional |
 | **Tier 2 — Productized app** | Real users, releases, recurring bugs | Add `architect`, `challenger`, reviewers, `spec-guardian` | REQ + ARCH + ADR for major choices |
 | **Tier 3 — Enterprise / regulated** | PII, auth, payments, infra, multi-team | Full agent team | Full `.specs/` tree, contracts, test plans, ADRs |
@@ -96,62 +101,51 @@ Move up a tier when any of these appear:
 For small projects, use:
 
 ```
-eng-orchestrator → requirements-analyst → implementer → test-runner → verifier
+eng-orchestrator → requirements-analyst → [challenger if consequential] → **user APPROVED**
+  → implementer(s) → test-runner → [code-reviewer as needed] → verifier
 ```
 
-Use `challenger` manually for important requirement approvals. Add `architect` when the change crosses a durable boundary: schema, public API, security, deployment, or framework choice.
+Use `challenger` for consequential requirement approvals (human still sets `APPROVED`). Add `architect` when the change crosses a durable boundary: schema, public API, security, deployment, or framework choice. Never use `tech-lead` for production recipes.
 
 ---
 
 ### The lifecycle — requirements drive everything
 
+**Build from recipes §0 matrix (minimal first).** Full team below is a **Tier 2–3 ceiling reference**, not the default. **User** owns every `APPROVED` and every override.
+
+### Prefer these minimal plans
+
+```
+Capability Tier 1:
+  requirements-analyst → **user APPROVED** → implementer → test-runner → verifier
+
+Bug-fix Tier 1:
+  debugger (BUG) → implementer → test-runner → code-reviewer → verifier
+
+Hotfix (urgent only):
+  debugger → implementer → test-runner → verifier  (+ security if adjacent; review ≤48h if deferred)
+```
+
+### Ceiling reference only (`greenfield-feature` / `capability`, Tier 2–3)
+
 ```
 Human intent
      │
      ▼
-requirements-analyst  ──→  REQ-NNN.md (draft)
-     │                      └── challenges assumptions inline
+requirements-analyst  ──→  REQ (DRAFT) → challenger R1 → author resolve → **Human APPROVED**
      ▼
-challenger            ──→  ≥2 critical objections
+architect             ──→  ARCH (DRAFT) → challenger R1 → **Human APPROVED**  [when ARCH required]
      │
+     ├─ backend / frontend / fullstack* / mobile / data  (route by surface)
      ▼
-requirements-analyst  ──→  REQ-NNN.md (APPROVED)  ← resolves objections
-     │
+qa-engineer → test-runner → code-reviewer ∥ security-reviewer → verifier → spec-guardian
      ▼
-architect             ──→  ARCH-NNN.md + ADR-NNN.md (draft)
-     │                      └── reads only APPROVED REQ-NNN.md
-     ▼
-challenger            ──→  ≥2 critical objections  (separate invocation)
-     │
-     ▼
-architect             ──→  ARCH-NNN.md (APPROVED)  ← resolves objections
-     │
-     ├─────────────────────┬────────────────────┐
-     ▼                     ▼                    ▼
-backend-engineer    frontend-engineer    data-engineer
-(reads REQ + ARCH)  (reads REQ + ARCH)  (reads REQ + ARCH)
-     │
-     ▼
-qa-engineer         ──→  TP-NNN.md  (reads REQ-NNN.md, not impl summary)
-     │
-     ▼
-test-runner         ──→  runs, fixes, re-runs
-     │
-     ├──────────────────────┬──────────────────────┐
-     ▼                      ▼                      ▼
-code-reviewer        security-reviewer    ponytail-review (skill)
-     │                      │                 (over-engineering)
-     └──────────────────────┴──────────────────────┘
-     ▼
-verifier            ──→  reads REQ-NNN.md + codebase only
-     │                    never reads handoff chain
-     ▼
-spec-guardian       ──→  checks .specs/ consistency vs repo
-     │
-     ▼
-DONE (specs + code consistent)
+DONE
 ```
 
+`*` Prefer split backend ∥ frontend when the slice is large or contracts are still moving. Add O agents only when the need checklist flags risk.
+
+**Infra:** `architect` → human → `platform-engineer` and/or `sre-devops` per matrix.
 ### Golden rule for every agent
 
 > You are NOT a validator of the work you receive.
@@ -179,15 +173,20 @@ Every project that uses this agent team **must** have this structure:
 │   └── ADR-002-event-sourcing.md     ← Supersede with new ADR, never edit old
 ├── contracts/
 │   ├── api/
-│   │   └── openapi.yaml              ← REST / GraphQL contracts (machine-readable)
+│   │   └── openapi.yaml              ← REST / GraphQL contracts (or project equivalent)
 │   ├── events/
 │   │   └── schema.md                 ← Queue / event contracts
 │   └── data/
 │       └── models.md                 ← Canonical data model
 ├── test-plans/
 │   └── TP-001-feature-name.md        ← QA test plan, derived from REQ not impl
+├── maintenance/
+│   └── BUG-001-short-title.md        ← Defect diagnosis (debugger); parent REQ link
+├── spikes/
+│   └── SPIKE-001-short-title.md      ← Tier 0 spike notes (promote to REQ/ARCH)
 ├── handoffs/
-│   └── GATE-REQ-001-approved.md      ← Optional checkpoint files (see §5)
+│   ├── GATE-REQ-001-approved.md      ← Optional checkpoint files (see §5)
+│   └── test-reports/                 ← Durable Gate 3 evidence (recommended)
 └── CHANGELOG.md                      ← Agent-maintained; what changed and why
 ```
 
@@ -211,8 +210,11 @@ Every project that uses this agent team **must** have this structure:
 ## Assumptions challenged
 - [Assumption from original request] → Resolution: [how it was resolved]
 
+## Objections resolved
+- [C1 Blocking] → fixed: [how] | deferred: [why + user ack] | human override: [rationale]
+
 ## Open questions
-- [Questions blocking approval]
+- [Questions blocking approval — clear or defer before user sets APPROVED]
 ```
 
 ### ARCH file template
@@ -245,7 +247,7 @@ Every project that uses this agent team **must** have this structure:
 [New services, scaling, migrations, env vars.]
 
 ## Objections resolved
-- [Challenger objection] → Resolution: [how addressed, or ADR reference]
+- [C1 Blocking] → fixed: [how / ADR] | deferred: [why] | human override: [rationale]
 ```
 
 ### ADR file template
@@ -255,7 +257,7 @@ Every project that uses this agent team **must** have this structure:
 > Date: YYYY-MM-DD | Status: Accepted | Supersedes: —
 
 ## Context
-[Why this decision was needed.]
+[Why this decision was needed. Include challenge round / human decision if applicable.]
 
 ## Decision
 [What was decided.]
@@ -265,8 +267,30 @@ Every project that uses this agent team **must** have this structure:
 
 ## Alternatives rejected
 [Options not chosen and the reason.]
+
+## Challenger IDs addressed
+- C1 → fixed in spec | overridden by human: [rationale] | deferred: [why]
+
+## Deferred risks
+- [Residual Important items accepted by human]
 ```
 
+### BUG file template (`bug-fix` / `hotfix`)
+
+```markdown
+# BUG-NNN — [title]
+> Status: OPEN | FIXED
+> Parent REQ: REQ-NNN
+> Severity: critical | high | medium | low
+
+## Observed behavior
+## Expected behavior (from REQ acceptance criterion if applicable)
+## Reproduction
+## Root cause (filled by debugger)
+## Fix scope / proposal
+## Spec gap? (yes/no)
+## Regression tests required
+```
 ---
 
 ## 4. Agent Roster
@@ -277,18 +301,18 @@ All agents live in `SPECFORGE_HOME/agents/` (user-scope, all projects).
 
 | Agent | File | Role | Readonly |
 |-------|------|------|----------|
-| `eng-orchestrator` | `eng-orchestrator.md` | Coordinates pipeline; enforces spec gates; never delegates without APPROVED specs | No |
-| `tech-lead` | `tech-lead.md` | Architecture plans from conversation (pre-spec-era; replaced by `architect` in spec-driven flow) | No |
+| `eng-orchestrator` | `eng-orchestrator.md` | Recipe×tier plan; enforces gates; checkpoints; does not author/approve/waive | No |
+| `tech-lead` | `tech-lead.md` | **Deprecated** for recipes — Tier 0 spike note only; else redirect to orchestrator | No |
 
 ### Spec agents
 
 | Agent | File | Role | Readonly |
 |-------|------|------|----------|
-| `requirements-analyst` | `requirements-analyst.md` | Turns human intent into precise, testable REQ specs; challenges ambiguity | No (writes specs) |
-| `architect` | `architect.md` | Produces ARCH specs + ADRs from APPROVED REQ specs | No (writes specs) |
-| `challenger` | `challenger.md` | Mandatory adversary; finds ≥2 objections before any spec is approved | Yes |
-| `spec-guardian` | `spec-guardian.md` | Post-change: checks .specs/ consistency vs repo; flags drift | Yes |
-| `adr-recorder` | `adr-recorder.md` | Captures mid-pipeline decisions into ADR files | No (writes ADRs) |
+| `requirements-analyst` | `requirements-analyst.md` | Writes testable REQ (DRAFT); user sets APPROVED after challenger | No (writes specs) |
+| `architect` | `architect.md` | Produces ARCH + ADRs + contracts from APPROVED REQ; user sets ARCH APPROVED | No (writes specs) |
+| `challenger` | `challenger.md` | Adversary; ≤2 rounds then human approve/override; prevents author loops | Yes |
+| `spec-guardian` | `spec-guardian.md` | Gate 4 drift; Blocking vs advisory; ≤2 audits then human waive | Yes |
+| `adr-recorder` | `adr-recorder.md` | Immutable ADRs including overrides/deferrals; does not start challenge loops | No (writes ADRs) |
 
 ### Implementation agents
 
@@ -300,25 +324,25 @@ Gates are **recipe × tier** (see each agent file and `eng-orchestrator`): REQ `
 | `frontend-engineer` | `frontend-engineer.md` | UI-only when contracts frozen; match repo stack | No |
 | `fullstack-engineer` | `fullstack-engineer.md` | Small vertical slice only; split if large | No |
 | `mobile-engineer` | `mobile-engineer.md` | iOS/Android/RN/Flutter — platform + offline/permissions | No |
-| `data-engineer` | `data-engineer.md` | SQL, ETL, pipelines, warehouses | No |
+| `data-engineer` | `data-engineer.md` | Schemas/migrations/ETL — recipe×tier gates; propose data contracts | No |
 
 ### Quality & safety agents
 
 | Agent | File | Role | Readonly |
 |-------|------|------|----------|
-| `qa-engineer` | `qa-engineer.md` | Test strategy from REQ spec → TP file | Yes |
-| `test-runner` | `test-runner.md` | Run tests, fix failures, re-run | No |
-| `code-reviewer` | `code-reviewer.md` | Reviews code + checks contracts/ alignment | Yes |
-| `security-reviewer` | `security-reviewer.md` | Security audit | Yes |
-| `verifier` | `verifier.md` | Reads REQ spec + codebase only; no handoff chain | No |
-| `debugger` | `debugger.md` | Root cause analysis | No |
+| `qa-engineer` | `qa-engineer.md` | Test strategy from APPROVED REQ → TP file (writes `.specs/test-plans/`) | No |
+| `test-runner` | `test-runner.md` | Run tests; capped fixes; durable Gate 3 evidence (not verifier) | No |
+| `code-reviewer` | `code-reviewer.md` | Spec/contract review; Critical blocks Gate 3; ≤2 rounds then human | Yes |
+| `security-reviewer` | `security-reviewer.md` | Security audit; Critical blocks Gate 3; ≤2 rounds then human | Yes |
+| `verifier` | `verifier.md` | Readonly; REQ/BUG + SHA + test report only; criterion evidence | Yes |
+| `debugger` | `debugger.md` | BUG-NNN + root cause; diagnose-first; spec-gap stop | No |
 
 ### Platform agents
 
 | Agent | File | Role | Readonly |
 |-------|------|------|----------|
-| `platform-engineer` | `platform-engineer.md` | Terraform, K8s, cloud IAM/networking | No |
-| `sre-devops` | `sre-devops.md` | CI/CD, Docker, observability, deploys | No |
+| `platform-engineer` | `platform-engineer.md` | IaC modules/resources; plan/validate evidence; prod apply only if user asks | No |
+| `sre-devops` | `sre-devops.md` | CI/CD + observability; no default vendor skills; split vs platform | No |
 
 ---
 
@@ -326,26 +350,83 @@ Gates are **recipe × tier** (see each agent file and `eng-orchestrator`): REQ `
 
 ### HANDOFF block (mandatory at end of every agent output)
 
-Every agent that produces output for the next stage **must** end with:
+Authoritative schema: skill **`spec-handoff`**. Every phase end **must** include:
 
-```
+```markdown
 ---
 ## HANDOFF
 **Goal completed:** [one line]
-**Artifacts written:** [file paths, e.g. .specs/requirements/REQ-001.md]
-**Key decisions:** [bullet list — max 5]
-**For next agent — paste this into their prompt:**
-  - Spec files to read: [paths]
-  - Constraints: [hard constraints next agent must respect]
-  - Open risks: [anything unresolved]
-**Blockers:** [anything that must be resolved before continuing]
 
-**Memory updated:** [paths under .cursor/agent-memory/ or "none"]
+**Artifacts written:**
+- [file paths]
 
-**Checkpoint file:** [.specs/handoffs/GATE-*.md if written, or "none"]
+**Key decisions:**
+- [max 5 bullets]
+
+**For next agent — paste into their prompt:**
+- Spec files to read: [paths]
+- Constraints: [hard constraints]
+- Open risks: [unresolved items]
+
+**Blockers:** [none | list]
+
+**Memory updated:**
+- [.agents/memory/ or .cursor/agent-memory/ paths]
+
+**Checkpoint file:**
+- [.specs/handoffs/GATE-*.md or "none"]
+
+**Token profile:** [advisory | handoff | implement | docs-touch | release]
+
+**Read order (next agent):** [max 3 paths — do not re-read chat]
+
+**Do not carry forward:** [what is now only on disk]
 ---
 ```
 
+Orchestrator also tracks: **Recipe**, **Tier**, **Phase**, **Next agent**, **Gate evidence paths** (SHA, test report, finding IDs). Delegation prompts stay **path-only** — do not paste this HANDOFF prose wholesale into the next subagent.
+
+### Approval authority (human-gated)
+
+| Action | Who |
+|--------|-----|
+| Write/edit DRAFT specs | Phase owner (`requirements-analyst`, `architect`, `debugger`, `adr-recorder`) |
+| Raise objections / review findings | `challenger`, `code-reviewer`, `security-reviewer`, `spec-guardian` |
+| Resolve objections in the artifact | Phase owner (cite each ID) |
+| Set `Status: APPROVED` | **User only** |
+| Override / defer Blocking / waive Critical / waive Blocking drift | **User only** — record in spec, ADR, or checkpoint |
+| Propose contract diffs | Implementers — freeze/accept via architect + user when consequential |
+| Mark DONE | Orchestrator after Gate 4 evidence |
+
+Agents must not self-approve DRAFT→APPROVED.
+
+### Challenge / review / drift anti-loops
+
+| Loop | Cap | Round 2 | Deadlock |
+|------|-----|---------|----------|
+| Challenger ↔ author | **2** rounds/artifact/phase | Delta only (open Blocking / regressions) | Human override or reject — **no Round 3** |
+| Code/security reviewer ↔ implementer | **2** rounds | Delta only | Human waive or reject |
+| Spec-guardian ↔ fix | **2** audits | Delta only | Human waive Blocking drift |
+| Implementer ↔ test-runner | **2** fix loops | — | Escalate to user |
+
+**Challenge flow:** Author DRAFT → Challenger R1 → Author resolves → **present to user** → approve | override | send back → optional R2 → user decision.
+
+Severity for challenger: **Blocking** / **Important** / **Nit** (only Blocking holds APPROVED).  
+Reviewers: only **Critical** holds Gate 3.  
+Guardian: only **Blocking** drift holds DONE; **Advisory** does not.
+
+### Implementer routing (quick)
+
+| Situation | Owner |
+|-----------|--------|
+| UI-only, API frozen | `frontend-engineer` |
+| API/server-only | `backend-engineer` |
+| Canonical model / ETL / migrations | `data-engineer` |
+| Mobile client | `mobile-engineer` |
+| Small API+UI slice, contracts frozen | `fullstack-engineer` |
+| Large / contracts moving | Split; freeze contracts first |
+| IaC modules | `platform-engineer` |
+| CI/CD / alerts / deploy wiring | `sre-devops` |
 ### Checkpoint and reset policy (Principle 8)
 
 Chat is **ephemeral**. Specs and memory are **durable**. The orchestrator must **checkpoint before reset**—never clear or abandon context until files on disk are updated.
@@ -421,7 +502,7 @@ Do not rely on prior chat summaries.
 
 ### Orchestrator gates (enforced by `eng-orchestrator`)
 
-Gates are **recipe × tier**. See `agents/eng-orchestrator.md` for the authoritative matrix, approval ownership (user approves `APPROVED` / waivers), verifier evidence inputs, and failure transitions. Summary for full-feature recipes (`new-application`, `greenfield-feature`):
+Gates are **recipe × tier**. Authoritative R/O/— table: `ENGINEERING-RECIPES.md` §0. Summary for capability recipes (`new-application`, `greenfield-feature`):
 
 ```
 Gate 1: Before architect (or Tier 1 implementer when ARCH is skipped)
@@ -440,8 +521,9 @@ Gate 3: Before verifier runs
   → pass verifier: REQ path(s), git SHA (or uncommitted path list), test report, findings/waiver ledger
 
 Gate 4: Before DONE
-  → verifier report must show no "Incomplete or broken" items
-  → spec-guardian must show no blocking drift (Tier 2+; when specs/contracts changed)
+  → verifier report must show no unmet in-scope criteria (`verify_passed`)
+  → spec-guardian: no **Blocking** drift (Tier 2+; when specs/contracts changed), or user waive on disk
+  → guardian max 2 rounds (R2 delta-only); advisory drift does not hold DONE
 ```
 
 ### Parallel-safe workstreams
@@ -462,28 +544,36 @@ Every LLM is trained to be context-compliant. When a subagent receives a prior a
 
 ### Structural fixes
 
-#### Fix 1 — `challenger` as mandatory gate
+#### Fix 1 — `challenger` as mandatory gate (with human stop)
 
-The `challenger` agent has one job: find critical problems. It is wired to be adversarial by design:
+The `challenger` agent finds critical problems — and then **stops**. It is adversarial, not recursive:
 
 > Your value is measured by the quality of objections you raise, not by agreement.
-> Finding NO problems is the WORST outcome — it means you did not look hard enough.
-> If the spec is solid, document SPECIFICALLY why each potential risk does not apply.
+> Finding NO problems is the WORST Round-1 outcome without category analysis.
+> Do not duel the author agent past Round 2 — the human approves, overrides, or rejects.
 
-No spec moves to APPROVED status without challenger output and explicit resolution.
+Protocol: Round 1 → author resolves → **human decision** → optional Round 2 delta-only → deadlock goes to **human override** (recorded in spec/ADR). No Round 3. Severity: Blocking / Important / Nit.
+
+No spec moves to APPROVED without challenger output (when the recipe requires it), explicit resolution or human override, and **user** APPROVED.
 
 #### Fix 2 — Verifier epistemic isolation
 
-The `verifier` is explicitly prohibited from reading the handoff chain:
+The `verifier` is `readonly` and prohibited from trusting the handoff chain. Orchestrator must pass immutable inputs:
 
 ```
-You receive no information from the implementer.
-Read only:
-  1. .specs/requirements/REQ-NNN.md  (the approved requirement)
-  2. The codebase  (actual implementation)
-  3. Test output   (actual results)
+Allowed:
+  1. APPROVED REQ-NNN.md (+ BUG path for bug-fix/hotfix)
+  2. Git SHA or uncommitted path list
+  3. Gate 3 test report path
+  4. Findings / waiver ledger (or none)
+  5. Optional ARCH path only if orchestrator listed it
+  6. The codebase (to map criteria)
 
-If the implementation contradicts the requirement, that is a failure —
+Forbidden as primary truth:
+  - Implementer / reviewer / architect HANDOFF prose
+  - Chat "work is done" claims
+
+If implementation contradicts REQ/BUG, that is a failure —
 even if every other agent in the pipeline approved it.
 ```
 
@@ -491,23 +581,26 @@ even if every other agent in the pipeline approved it.
 
 | Agent | Mandatory skeptical posture |
 |-------|----------------------------|
-| `requirements-analyst` | Challenges ambiguity, hidden assumptions, and missing edge cases in the original request |
-| `architect` | Challenges feasibility and completeness of requirements before designing |
-| `challenger` | Adversary by design; argues against the spec it receives |
-| `code-reviewer` | Trusts the spec, not the implementer's description |
-| `security-reviewer` | Treats all code as potentially dangerous until proven safe |
-| `verifier` | Trusts only the REQ spec; the implementer's claim is unproven until verified |
-| `spec-guardian` | Trusts only the spec files; the codebase is suspected of drift until proven consistent |
-
-#### Fix 4 — Debate before consensus
+| `requirements-analyst` | Challenges ambiguity; leaves DRAFT for **user** APPROVED |
+| `architect` | Escalates REQ gaps; never self-approves ARCH; contracts freeze for implementers |
+| `challenger` | Adversary with severity + **2-round cap**; then human |
+| `debugger` | Spec gap vs defect; writes BUG-NNN; does not invent product behavior |
+| `code-reviewer` / `security-reviewer` | Trust specs + diff; Critical blocks Gate 3; ≤2 rounds |
+| `test-runner` | Preserve test intent; durable evidence; not verifier |
+| `verifier` | REQ/BUG + cited evidence only; readonly |
+| `spec-guardian` | Blocking vs advisory drift; does not replace verifier |
+| `tech-lead` | Deprecated for recipes — refuse formal skip-specs |
+#### Fix 4 — Debate before consensus (capped)
 
 For architectural decisions:
 1. `architect` proposes → writes ARCH (draft)
-2. `challenger` argues against it → returns ≥2 objections
-3. `architect` resolves each objection in the ARCH doc, records major resolutions as ADRs
-4. ARCH moves to APPROVED only after objections are explicitly addressed — not dismissed
+2. `challenger` Round 1 → returns severity-tagged objections
+3. `architect` resolves each ID in the ARCH doc; major resolutions → `adr-recorder`
+4. **Human** sees the table: approve, override (with rationale), defer Important, or send back
+5. Optional `challenger` Round 2 (delta only) if human requested re-check
+6. ARCH `APPROVED` only by **human** — never by agent stalemate resolution
 
-This creates an **audit trail of why rejected alternatives were rejected**, which is exactly what future maintenance agents need.
+This creates an audit trail of rejected alternatives and overrides without an infinite author↔challenger loop.
 
 #### Fix 5 — Checkpoint and reset (anti–context rot)
 
@@ -627,7 +720,7 @@ Exact per-subagent metering is **not available in hooks today**. Use three tiers
 |------|--------|
 | A | Billing export (ground truth) |
 | B | `session.jsonl` ledger (hooks) + `ctx stats` + gate file counts |
-| C | `bash scripts/estimate-pipeline-tokens.sh <recipe> --tier N` |
+| C | `bash scripts/estimate-pipeline-tokens.sh <recipe> --tier N --mode minimal` (ceiling optional) |
 
 At release (Tier 2+): `bash scripts/collect-release-metrics.sh --since <tag>` → skill **`spec-release-metrics`** → `.specs/metrics/releases/REL-*.yaml`.
 
@@ -683,11 +776,12 @@ is_background: false       # true only for genuinely long-running scans
 
 | Prefix | Category | Examples |
 |--------|----------|---------|
-| (none) | Implementation | `backend-engineer`, `frontend-engineer` |
+| (none) | Implementation | `backend-engineer`, `frontend-engineer`, `fullstack-engineer`, `mobile-engineer`, `data-engineer` |
 | (none) | Platform | `platform-engineer`, `sre-devops` |
-| (none) | Quality | `qa-engineer`, `test-runner`, `verifier` |
-| (none) | Spec | `requirements-analyst`, `architect`, `challenger` |
+| (none) | Quality | `qa-engineer`, `test-runner`, `verifier`, `debugger` |
+| (none) | Spec | `requirements-analyst`, `architect`, `challenger`, `adr-recorder` |
 | (none) | Review | `code-reviewer`, `security-reviewer`, `spec-guardian` |
+| (none) | Orchestration | `eng-orchestrator` (`tech-lead` deprecated) |
 
 ### Do not add agents for:
 - Single-purpose one-shot tasks (use a **skill** instead)
@@ -712,22 +806,27 @@ For in-IDE Cursor agent workflows, token efficiency comes from the strategies in
 
 ---
 
-## Appendix D — Orchestrator recipes (production flows)
+## Appendix D — Orchestrator recipes (production + meta)
 
 Full definitions: `SPECFORGE_HOME/ENGINEERING-RECIPES.md`
 
 | Recipe | Use |
 |--------|-----|
-| `greenfield-feature` | New capability (default full pipeline) |
-| `new-application` | Greenfield product + ARCH-000 |
+| `greenfield-feature` | New user-facing capability (`capability` / `feature-change` alias); tier-scaled minimal plan — not a default |
+| `new-application` | Greenfield product; ARCH-000 if T2+ or durable boundary |
 | `bug-fix` | Defect — `.specs/maintenance/BUG-NNN.md` + parent REQ |
-| `hotfix` | Urgent fix; backfill spec after merge |
+| `hotfix` | Urgent fix; backfill BUG/CHANGELOG after |
 | `maintenance` | Deps, refactor — ADR / ARCH delta |
-| `infra-change` | Platform + SRE |
+| `infra-change` | Platform (IaC) + SRE (CI/CD/observability) |
 | `spec-only` | REQ/ARCH without code |
 | `security-patch` | CVE / security findings |
+| `advisory-only` | Review/feasibility — **readonly** until user says implement |
+| `vendor-sync` | Sync third-party skills (harness only) |
+| `docs-touch` | README/ROADMAP/docs only |
 
 Invoke: `/eng-orchestrator recipe: bug-fix — [description]` or skill `/spec-recipes`.
+
+Authoritative gate matrix, failure transitions, and verifier inputs: `agents/eng-orchestrator.md`.
 
 ---
 
@@ -735,15 +834,19 @@ Invoke: `/eng-orchestrator recipe: bug-fix — [description]` or skill `/spec-re
 
 | Skill | Path | Agent(s) |
 |-------|------|----------|
-| `spec-req-author` | `SPECFORGE_HOME/skills/spec-req-author/` | requirements-analyst, qa-engineer |
-| `spec-arch-author` | `SPECFORGE_HOME/skills/spec-arch-author/` | architect, adr-recorder, data-engineer |
-| `spec-challenger` | `SPECFORGE_HOME/skills/spec-challenger/` | challenger |
+| `spec-req-author` | `SPECFORGE_HOME/skills/spec-req-author/` | requirements-analyst |
+| `spec-arch-author` | `SPECFORGE_HOME/skills/spec-arch-author/` | architect, adr-recorder (ADR template); implementers only to spot gaps |
+| `spec-challenger` | `SPECFORGE_HOME/skills/spec-challenger/` | challenger (capped rounds + human stop) |
 | `spec-handoff` | `SPECFORGE_HOME/skills/spec-handoff/` | all agents (end of phase) |
-| `spec-verifier` | `SPECFORGE_HOME/skills/spec-verifier/` | verifier, test-runner |
-| `spec-guardian-drift` | `SPECFORGE_HOME/skills/spec-guardian-drift/` | spec-guardian, code-reviewer |
-| `spec-pipeline` | `SPECFORGE_HOME/skills/spec-pipeline/` | eng-orchestrator (invoke `/spec-pipeline`) |
-| `spec-recipes` | `SPECFORGE_HOME/skills/spec-recipes/` | eng-orchestrator (invoke `/spec-recipes`) |
-| `spec-agent-memory` | `SPECFORGE_HOME/skills/spec-agent-memory/` | all agents (project `.cursor/agent-memory/`) |
+| `spec-verifier` | `SPECFORGE_HOME/skills/spec-verifier/` | verifier (not test-runner) |
+| `spec-guardian-drift` | `SPECFORGE_HOME/skills/spec-guardian-drift/` | spec-guardian |
+| `spec-pipeline` | `SPECFORGE_HOME/skills/spec-pipeline/` | eng-orchestrator |
+| `spec-recipes` | `SPECFORGE_HOME/skills/spec-recipes/` | eng-orchestrator |
+| `spec-agent-memory` | `SPECFORGE_HOME/skills/spec-agent-memory/` | all agents |
+| `spec-advisory` | `SPECFORGE_HOME/skills/spec-advisory/` | advisory-only / review prompts |
+| `spec-token-budget` | `SPECFORGE_HOME/skills/spec-token-budget/` | eng-orchestrator + meta recipes |
+| `spec-vendor-sync` | `SPECFORGE_HOME/skills/spec-vendor-sync/` | vendor-sync recipe |
+| `spec-release-metrics` | `SPECFORGE_HOME/skills/spec-release-metrics/` | release metering (Tier 2+) |
 
 ### Ponytail skills (vendored, MIT)
 
@@ -751,47 +854,50 @@ Upstream: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) 
 
 | Skill | Path | Agent(s) |
 |-------|------|----------|
-| `ponytail` | `SPECFORGE_HOME/skills/ponytail/` | backend/frontend/fullstack-engineer |
+| `ponytail` | `SPECFORGE_HOME/skills/ponytail/` | implementers: backend, frontend, fullstack, mobile, data, platform, sre, debugger, test-adjacent minimal fixes |
 | `ponytail-review` | `SPECFORGE_HOME/skills/ponytail-review/` | code-reviewer (Gate 3) |
 | `ponytail-audit` | `SPECFORGE_HOME/skills/ponytail-audit/` | maintenance recipe |
 | `ponytail-debt` | `SPECFORGE_HOME/skills/ponytail-debt/` | maintenance recipe |
 
 Cursor: always-on rule `SPECFORGE_HOME/rules/ponytail.mdc` (bootstrapped to `.cursor/rules/`).
 
+Do **not** default security/SRE/platform agents to cloud-vendor skills; match ARCH/repo (Principle 9).
 ---
 
 ## Appendix B — Quick reference: invoke the team
 
 ```
-# Orchestrated feature (full pipeline)
-/eng-orchestrator Add user profile API with React settings page
+# Orchestrated capability (need check first; minimal plan from recipes matrix)
+/eng-orchestrator Tier: 1 | need: new settings capability
+Add user profile API with React settings page
+
+# Advisory (readonly)
+/eng-orchestrator recipe: advisory-only — should we add ForgeCode support?
 
 # Spec phase only
 /requirements-analyst Define requirements for the notification system
-/challenger Review .specs/requirements/REQ-001.md
+/challenger Review .specs/requirements/REQ-001.md  (Challenge round: 1)
 
 # Implement against existing approved specs
-/backend-engineer Implement REQ-001; read .specs/requirements/REQ-001.md and .specs/architecture/ARCH-001.md first
-/frontend-engineer Build the settings UI per REQ-001 and ARCH-001
+/backend-engineer Implement REQ-001; read REQ + ARCH paths from orchestrator
+/frontend-engineer Build UI per REQ-001 (contracts frozen)
+/debugger bug-fix — capture BUG-NNN then hand off
 
 # Quality
-/qa-engineer Write test plan for REQ-001
-/test-runner Run tests and fix failures
-/code-reviewer Review the auth module changes
-# Optional Gate 3 — invoke skill ponytail-review on the diff for bloat
-/security-reviewer Review the payment module
+/qa-engineer Write TP for APPROVED REQ-001
+/test-runner Run TP-mapped suite; save report path
+/code-reviewer Review round: 1 — diff vs REQ/contracts
+/security-reviewer Review auth/PII surface (specs first; no vendor default)
 
-# Verify
-/verifier Confirm REQ-001 is fully implemented; read .specs/requirements/REQ-001.md
+# Verify + drift
+/verifier Confirm REQ-001; inputs: SHA + test report + waivers
+/spec-guardian Blocking vs advisory drift before DONE
 
 # Platform
-/platform-engineer Add staging App Service Terraform module
-/sre-devops Wire the new service into GitHub Actions deploy pipeline
-
-# Consistency check
-/spec-guardian Check .specs/ consistency against current repo
+/platform-engineer IaC modules per ARCH infra (plan/validate evidence)
+/sre-devops Wire CI/CD + alerts per ARCH (repo toolchain; no vendor default)
 ```
 
 ---
 
-*This playbook is maintained by the agent team itself. Any change to agent behaviour, pipeline gates, or spec format must update this document first.*
+*This playbook is maintained with the agent team. Any change to agent behaviour, pipeline gates, or spec format must update this document and the matching `agents/*.md` contracts.*

@@ -1,35 +1,42 @@
 ---
 name: eng-orchestrator
-description: Run the spec-driven orchestrator with tier and recipe
+description: Run need-based orchestrator — checklist → recipe × tier → minimal agents
 ---
 
 # Engineering orchestrator
 
-Delegate to the `eng-orchestrator` agent with checkpoint discipline (Principle 8).
+Delegate to the `eng-orchestrator` agent with checkpoint discipline (Principle 8).  
+Authoritative sizing: `ENGINEERING-RECIPES.md` §0. Recipe is optional — orchestrator picks from need.
 
 ## Prompt template
 
 ```
 /eng-orchestrator
 
+Need: [capability | bug | hotfix | greenfield product | …]
 Tier: [n]
-Recipe: [recipe-id]
+Suggested recipe: [optional — may reclassify]
 
 [Goal and any known REQ/ARCH/BUG paths]
+Stop at READY_FOR_APPROVAL — I own Status: APPROVED.
 ```
 
 ## Examples
 
 **New application (Tier 1):**
 ```
-Tier: 1 | Recipe: new-application
+Need: greenfield product — first slice
+Tier: 1
 Build a [description]. Bootstrap .specs/ if missing.
+ARCH-000 only if durable boundary.
 ```
 
 **Bug fix:**
 ```
-Tier: 1 | Recipe: bug-fix
+Need: defect in [area]
+Tier: 1
+Suggested recipe: bug-fix
 [Symptom]. Parent REQ: REQ-001 if known.
 ```
 
-Read `.cursor/agent-memory/_project/specs-index.md` first if the project is bootstrapped.
+Read `.agents/memory/_project/specs-index.md` (or `.cursor/agent-memory/…`) first if the project is bootstrapped.

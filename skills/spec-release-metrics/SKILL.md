@@ -1,48 +1,54 @@
 ---
 name: spec-release-metrics
 description: >-
-  Record release efficiency: estimated tokens, subagent counts, context-mode
-  savings, quality KPIs. Use at Tier 2+ release, sprint end, or when comparing
-  recipes. Writes .specs/metrics/releases/REL-*.yaml.
+  Record release efficiency against need-based plans: planned vs run agents,
+  estimated tokens (minimal mode), human gates, quality KPIs. Writes
+  .specs/metrics/releases/REL-*.yaml.
 disable-model-invocation: true
 ---
 
 # Spec release metrics
 
-Playbook: `SPECFORGE_HOME/ENGINEERING-METRICS.md`
+Playbook: `SPECFORGE_HOME/ENGINEERING-METRICS.md` · recipes: `ENGINEERING-RECIPES.md` §0
 
 ## When to use
 
-- Before tagging a release (Tier 2+)
-- After a pilot comparing recipes or tiers
-- When executive summary §8 KPIs are requested
+- Before tagging a release (Tier 2+ full ceremony; Tier 1 optional lightweight)
+- After a pilot comparing recipes, tiers, or minimal vs ceiling
+- When executive KPIs are requested
 
 ## Steps
 
-1. **Collect proxies** (shell, do not paste large output into chat):
+1. **Collect proxies** (do not paste large output into chat):
 
-   ```bash
+```bash
    bash scripts/collect-release-metrics.sh --since <prev-tag>
-   bash scripts/estimate-pipeline-tokens.sh greenfield-feature --tier 2
-   ```
+   # preferred: pass agents_planned from MEMORY/HANDOFF
+   bash scripts/estimate-pipeline-tokens.sh <recipe> --tier <n> --agents <comma-list>
+   # fallback:
+   # bash scripts/estimate-pipeline-tokens.sh <recipe> --tier <n> --mode minimal
+```
 
-2. **context-mode** (if installed): run `ctx stats`; record `context_mode_savings_ratio` only (one number + one sentence).
+2. **context-mode** (if installed): `ctx stats` → one `context_mode_savings_ratio`.
 
-3. **Quality** from specs:
-   - `specs-index.md` — REQ IDs shipped
-   - Last verifier / spec-guardian HANDOFF or reports — gaps and drift counts
+3. **Plan discipline** from orchestrator MEMORY / HANDOFFs:
+   - recipe, tier, agents planned (R + accepted O), agents run
+   - reclassifications, human APPROVE/override/waive counts
+   - max challenge/review/guardian rounds
+   - hotfix deferred reviews; parent_REQ modes
 
-4. **Write** `.specs/metrics/releases/REL-<YYYY-MM-DD>.yaml` using schema in ENGINEERING-METRICS.md §7.
+4. **Quality** from specs:
+   - shipped REQ/BUG IDs
+   - in-scope verifier coverage (not blanket full-REQ if hotfix/BUG-scoped)
+   - Blocking vs advisory drift
 
-5. **Summarize** in ≤15 lines for humans:
-   - tokens/REQ (estimated)
-   - subagent runs vs gate checkpoints
-   - quality: verifier gaps, drift
-   - one improvement for next release
+5. **Write** `.specs/metrics/releases/REL-<YYYY-MM-DD>.yaml` per ENGINEERING-METRICS.md §7.
+
+6. **Summarize** ≤15 lines: tokens/REQ (minimal estimate), ceiling overrun, human decisions, in-scope gaps, Blocking drift.
 
 ## Rules
 
-- Label estimates `confidence: low|medium|high` — never present heuristics as billing fact.
-- If billing export exists, put it in `tokens.billing_total` and set `method: billing_export`.
-- Do not skip quality metrics when reporting token savings.
-- Commit the YAML to git with the release.
+- Default estimate mode: **`minimal`**. Label `confidence` and `method`.
+- Never present heuristics as billing fact.
+- Do not skip plan-discipline or quality when reporting token savings.
+- Commit the YAML with the release.

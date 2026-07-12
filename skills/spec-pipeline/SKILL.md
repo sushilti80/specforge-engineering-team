@@ -1,99 +1,99 @@
 ---
 name: spec-pipeline
 description: >-
-  Spec-driven engineering pipeline gates and agent invoke cheat sheet. Use when
-  starting a feature, new app, or orchestrating REQ→ARCH→implement→verify.
+  Spec-driven pipeline entry: need checklist → smallest recipe × tier → minimal
+  agent plan. Defers to ENGINEERING-RECIPES.md §0. Not a full-ceiling mandate.
 disable-model-invocation: true
 ---
 
 # Spec-driven pipeline
 
-Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` (or plugin `docs/ENGINEERING-PLAYBOOK.md`)  
-Recipes: `SPECFORGE_HOME/ENGINEERING-RECIPES.md` · skill `spec-recipes`  
-Harness: `specforge-engineering-team` — install with `bash scripts/install.sh` (Cursor) or `bash scripts/install-all.sh`
+**Authoritative right-sizing:** `SPECFORGE_HOME/ENGINEERING-RECIPES.md` §0 (need → choose → matrix R/O/— → adapt).  
+**Orchestrator:** `agents/eng-orchestrator.md` · skill **`spec-recipes`**.  
+Playbook: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`.
 
-## Recipes (production)
+This skill is a **cheat sheet**, not a mandate to run every agent.
 
-| Recipe | When |
-|--------|------|
-| `greenfield-feature` | New capability (full pipeline below) |
-| `bug-fix` | Defect — BUG-NNN + parent REQ |
-| `hotfix` | Urgent fix — minimal gates |
-| `maintenance` | Deps / refactor — ADR + challenger |
-| `infra-change` | IaC / CI / K8s |
-| `new-application` | Greenfield product |
-| `spec-only` | REQ/ARCH only |
-| `security-patch` | CVE / security finding |
+## 1. Start here (every time)
 
-Invoke: `/eng-orchestrator recipe: bug-fix — [description]`
+1. Run need checklist (intent, urgency, capability, contracts, novelty, knowledge, scope, parent REQ).
+2. Pick **smallest** recipe — **no default** production recipe.
+3. Build plan from recipe×tier matrix: list **R** agents; add **O** only with checklist reason; state **skipped**.
+4. Stop for **user** `APPROVED` / override / waive — agents do not self-approve.
+5. Adapt mid-flight if evidence changes; announce before continuing.
 
-## Principle 8 — checkpoint + reset
+Invoke: `/eng-orchestrator [goal]` (optional `recipe:` hint — may reclassify).
 
-After each gate: update specs + memory → optional `.specs/handoffs/GATE-*.md` → **fresh subagent** with paths only. New parent chat per REQ when done. See playbook §5.
+## 2. Recipes (quick)
 
-## Gates (full feature only — do not skip)
+| Recipe | When | Plan shape |
+|--------|------|------------|
+| `advisory-only` / `docs-touch` / `vendor-sync` | Meta | Readonly / docs / harness |
+| `spec-only` | Specs, no code | Analyst → user APPROVED (± challenger) |
+| `bug-fix` | Defect | debugger → implement → test → review → verify |
+| `hotfix` | Prod-urgent only | Minimal + abbreviated verify; review ≤48h if deferred |
+| `maintenance` | No new capability | ADR → implement → test → verify |
+| `infra-change` | IaC/CI/env | ARCH/ADR → platform/sre → test → verify |
+| `security-patch` | CVE | security → implement → re-scan → verify |
+| `greenfield-feature` (`capability`) | New user-facing capability | **Minimal first** (see matrix); not “always full team” |
+| `new-application` | New product | REQ-001 → ARCH-000 if T2+ or durable boundary → then capability slice |
 
-| # | Before | Requires |
-|---|--------|----------|
-| 1 | `architect` | REQ `APPROVED` + challenger resolved |
-| 2 | implementers | ARCH `APPROVED` + challenger resolved |
-| 3 | `verifier` | tests green; no Critical from reviewers; `ponytail-review` on diff (Tier 1+) |
-| 4 | DONE | verifier pass; `spec-guardian` no blocking drift |
+## 3. Gates (only those implied by **R** agents)
 
-## Pipeline
+| Gate | When required |
+|------|----------------|
+| G1 REQ user-APPROVED | Before architect / implementers per matrix |
+| G2 ARCH user-APPROVED | When ARCH is **R** for this tier |
+| G3 tests + Critical-clear | Before verifier when test/review are **R** |
+| G4 verify + Blocking drift clear | Before DONE when verifier/guardian are **R** |
 
-```
-requirements-analyst → challenger → REQ APPROVED
-architect → challenger → ARCH APPROVED + ADRs + contracts
-implementers (parallel if contracts frozen)
-qa-engineer → TP from REQ
-test-runner
-code-reviewer ∥ security-reviewer ∥ ponytail-review (skill)
-verifier (REQ + code only)
-spec-guardian
-```
+Human owns APPROVED, overrides, Critical waivers, Blocking-drift waivers. Loops ≤2 rounds.
 
-## Invoke
+**Conflict:** recipes omit/skip wins unless checklist flags risk — do not “add agents to be safer” by default.
 
-| Phase | Agent |
-|-------|--------|
-| Orchestrate | `/eng-orchestrator` |
-| Requirements | `/requirements-analyst` + skill `spec-req-author` |
-| Challenge | `/challenger` + skill `spec-challenger` |
-| Architecture | `/architect` + skill `spec-arch-author` |
-| Implement | `/backend-engineer` `/frontend-engineer` `/fullstack-engineer` |
-| QA plan | `/qa-engineer` |
-| Tests | `/test-runner` |
-| Review | `/code-reviewer` `/security-reviewer` + skill `ponytail-review` |
-| Verify | `/verifier` + skill `spec-verifier` |
-| Drift | `/spec-guardian` + skill `spec-guardian-drift` |
+## 4. Minimal examples (not ceilings)
 
-## New app
+**Capability Tier 1:** REQ → **user APPROVED** → implementer → test-runner → verifier  
+
+**Bug-fix Tier 1:** debugger (BUG) → implementer → test-runner → code-reviewer → verifier  
+
+**Hotfix:** debugger → implementer → test-runner → verifier (+ security if adjacent)
+
+Full ASCII of every agent is a **Tier 3 ceiling**, not the default path. See recipes matrix.
+
+## 5. Principle 8
+
+After each gate: update specs + memory (include **agents_planned**) → optional GATE file → **fresh subagent** with paths only.
+
+## 6. Invoke map
+
+| Phase | Agent / skill |
+|-------|----------------|
+| Orchestrate | `/eng-orchestrator` + `spec-recipes` |
+| REQ | `/requirements-analyst` + `spec-req-author` (**user** APPROVED) |
+| Challenge | `/challenger` + `spec-challenger` |
+| ARCH | `/architect` + `spec-arch-author` (**user** APPROVED) |
+| Implement | backend / frontend / fullstack / mobile / data / platform / sre |
+| QA / test / review / verify / drift | qa-engineer, test-runner, reviewers, verifier, spec-guardian |
+
+## 7. New app
 
 ```bash
 bash scripts/bootstrap-project.sh ./your-app
 ```
 
-Or copy template manually from `SPECFORGE_HOME/templates/spec-driven-app/` if installed.
-
-Then: `/eng-orchestrator Build [app description]; run full spec pipeline from REQ-001.`
+Then: `/eng-orchestrator Build [app]. Recipe from need checklist — start new-application then capability Tier 1 minimal unless risk says otherwise.`
 
 ## Skills map
 
 | Skill | Role |
 |-------|------|
-| `spec-req-author` | Write REQ |
-| `spec-arch-author` | Write ARCH/ADR/contracts |
-| `spec-challenger` | Adversarial review |
-| `spec-handoff` | End-of-phase HANDOFF block |
-| `spec-verifier` | Verify vs REQ |
-| `spec-guardian-drift` | Drift audit |
-| `spec-pipeline` | This cheat sheet |
-| `ponytail` | Minimal code ladder (implementers) |
-| `ponytail-review` | Diff audit for over-engineering (Gate 3) |
-| `ponytail-audit` | Repo-wide bloat audit (maintenance recipe) |
-| `ponytail-debt` | Harvest `ponytail:` deferred shortcuts |
-| `spec-release-metrics` | Release YAML — tokens (est.), subagent counts, quality KPIs |
-| `spec-advisory` | Readonly review / compare / feasibility |
-| `spec-token-budget` | Output caps by task profile |
-| `spec-vendor-sync` | Third-party skill sync checklist |
+| `spec-recipes` | Need-based recipe selection (primary) |
+| `spec-pipeline` | This entry cheat sheet |
+| `spec-req-author` / `spec-arch-author` | Write DRAFT specs |
+| `spec-challenger` | Adversarial review (capped) |
+| `spec-handoff` | End-of-phase HANDOFF |
+| `spec-verifier` / `spec-guardian-drift` | Verify / drift |
+| `spec-token-budget` / `spec-advisory` / `spec-vendor-sync` | Token / meta |
+| `spec-release-metrics` | Release YAML |
+| `ponytail` / `ponytail-review` | Minimal code / Gate 3 bloat |

@@ -1,8 +1,8 @@
 ---
 name: spec-arch-author
 description: >-
-  Write ARCH specs and ADRs from APPROVED REQ files. Use for architecture design,
-  alternatives, contracts, and ARCH approval in .specs/architecture/.
+  Write ARCH specs and ADRs from user-APPROVED REQ files. Leaves ARCH in DRAFT
+  after challenger; user sets Status: APPROVED — agents must not.
 paths: .specs/architecture/**,.specs/decisions/**,.specs/contracts/**
 ---
 
@@ -58,5 +58,7 @@ Do not start unless linked `REQ-NNN.md` has `Status: APPROVED`.
 ## Rules
 - ≥2 alternatives per major decision in the ARCH table.
 - Do not write application code in this skill—specs only.
+- Keep ARCH `Status: DRAFT` until the **user** sets `APPROVED`.
+- After challenger: resolve objection IDs in **Objections resolved**; HANDOFF `READY_FOR_APPROVAL` and **stop** — do not self-approve.
 
 End with skill `spec-handoff`.

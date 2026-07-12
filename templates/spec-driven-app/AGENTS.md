@@ -1,12 +1,13 @@
 # SpecForge — spec-driven engineering (this project)
 
-> Specs are source of truth. Chat is ephemeral. Memory learns on disk (Principle 8).
+> Specs are source of truth. Chat is ephemeral. Memory learns on disk (Principle 8).  
+> Control plane: need → smallest recipe × tier → human APPROVED → ≤2-round anti-loops.
 
 ## Paths
 
 | Path | Purpose |
 |------|---------|
-| `.specs/` | REQ, ARCH, ADR, contracts, test plans (source of truth) |
+| `.specs/` | REQ, ARCH, ADR, contracts, test plans, BUG, handoffs |
 | `.agents/memory/` | Durable agent memory (commit to git) |
 | `SPECFORGE_HOME/` | Playbook and recipes (installed by your AI tool) |
 
@@ -17,30 +18,33 @@ Resolve **SPECFORGE_HOME** from the first path that exists:
 - `$HOME/.config/opencode/specforge/` (OpenCode)
 - `$HOME/.claude/docs/specforge/` (Claude Code)
 
-Read: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`, `SPECFORGE_HOME/ENGINEERING-RECIPES.md`
+Read: `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`, `SPECFORGE_HOME/ENGINEERING-RECIPES.md` **§0**
 
 ## Start work
 
-**Cursor:** `/spec-pipeline` or `/eng-orchestrator`
+**Cursor / OpenCode:** `/eng-orchestrator` (preferred). `/spec-pipeline` and `/spec-recipes` defer to recipes §0.
 
-**OpenCode:** `/spec-pipeline` or `@eng-orchestrator`
-
-**Codex / Claude:** Use this prompt template:
+**Codex / Claude:** Use this prompt:
 
 ```
+Need: [capability | bug | hotfix | greenfield product | …]
 Tier: [0|1|2|3]
-Recipe: [new-application | greenfield-feature | bug-fix | hotfix | maintenance | infra-change | spec-only | security-patch]
+Suggested recipe: [optional]
 
 [Describe the work in 2–5 sentences]
+Stop at READY_FOR_APPROVAL — I own Status: APPROVED.
+
+Act as eng-orchestrator: run need checklist, pick smallest recipe × tier,
+build minimal agents_planned (state skipped), stop for user APPROVED on disk.
 ```
 
-Act as **eng-orchestrator** — pick tier and recipe from `ENGINEERING-RECIPES.md`, delegate with file paths only.
+Do **not** assume `Recipe: greenfield-feature` or a full agent list.
 
 ## Gate checkpoint (every phase)
 
 1. Update `.specs/` if changed
 2. Update `.agents/memory/_project/specs-index.md`
-3. Update `.agents/memory/<agent>/MEMORY.md`
+3. Update `.agents/memory/eng-orchestrator/MEMORY.md` (**Active plan**: agents_planned / skipped / adapt watchers)
 4. Optionally write `.specs/handoffs/GATE-*.md`
 
 Fresh agent per gate. No prose paste from prior chats.
@@ -50,24 +54,24 @@ Fresh agent per gate. No prose paste from prior chats.
 | Tier | Use |
 |------|-----|
 | 0 | Spike — no formal specs |
-| 1 | MVP / small app (default) |
-| 2 | Product with releases |
-| 3 | Enterprise / regulated |
+| 1 | MVP / small app (default) — REQ APPROVED; ARCH only if durable boundary |
+| 2 | Product with releases — matrix adds architect/challenger/reviewers/guardian as R |
+| 3 | Enterprise / regulated — ceiling still omit-by-checklist |
 
-## Default new app
+## First new app (typical Tier 1)
 
 ```
 Tier: 1
-Recipe: new-application
+Need: new product / first slice
+→ new-application and/or capability (greenfield-feature)
+→ REQ DRAFT → user APPROVED → implementer → test-runner → verifier
 ```
-
-Then: requirements-analyst → challenger → architect → implementers → test-runner → verifier → spec-guardian.
 
 ## Rules
 
-- No implementation before REQ `APPROVED` (Tier 1+)
-- No architecture before REQ approved + challenger resolved
-- Verifier reads REQ + code only — not implementer chat
+- No implementation before REQ `APPROVED` when the recipe/tier requires it (user sets status)
+- Agents do not self-approve REQ/ARCH
+- Verifier: REQ/BUG + SHA + test report — not implementer chat
 - Never store secrets in memory files
 
-Multi-tool guide: `SPECFORGE_HOME/MULTI-TOOL.md`
+Multi-tool: `SPECFORGE_HOME/MULTI-TOOL.md` · Bootstrap: `SPECFORGE_HOME/BOOTSTRAP-SPEC-DRIVEN-PROJECT.md`
