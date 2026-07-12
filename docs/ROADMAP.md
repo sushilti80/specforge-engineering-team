@@ -2,9 +2,21 @@
 
 Last updated: 2026-07-11
 
+## Current release
+
+| Tag | Notes |
+|-----|--------|
+| **[v2.0.1](RELEASE-v2.0.1.md)** | Anti-leak: spawn allowlist, path-only HANDOFF, disk-wins-over-chat |
+| [v2.0.0](RELEASE-v2.0.0.md) | Need-based control plane (breaking): recipes §0, human APPROVED, ≤2-round anti-loops |
+| [v1.1.0](https://github.com/sushilti80/specforge-engineering-team/releases/tag/v1.1.0) | Prior line — upgrade via install scripts |
+
+**Doctrine (v2):** need checklist → smallest recipe × tier → minimal agents → human `Status: APPROVED` → fresh subagents with **paths only** (no chat-summary spawn). Authoritative: `ENGINEERING-RECIPES.md` §0 · `ENGINEERING-PLAYBOOK.md`.
+
+---
+
 ## Shipped (supported today)
 
-**Current release:** [v2.0.1](RELEASE-v2.0.1.md) — anti-leak spawn allowlist + path-only HANDOFF ([v2.0.0](RELEASE-v2.0.0.md) need-based control plane).
+### Platforms
 
 | Platform | Install | Agents | Skills | Hooks | Ponytail |
 |----------|---------|--------|--------|-------|----------|
@@ -13,101 +25,121 @@ Last updated: 2026-07-11
 | **Codex CLI** | `scripts/install-codex.sh` | via AGENTS.md | 19 | — | skills |
 | **OpenCode** | `scripts/install-opencode.sh` | 20 | 19 | — | skills |
 
-**Ponytail** (vendored from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail), MIT):
+Bootstrap: `scripts/bootstrap-project.sh` · guide: `BOOTSTRAP-SPEC-DRIVEN-PROJECT.md` · parity: `MULTI-TOOL.md`.
 
-- Six skills: `ponytail`, `ponytail-review`, `ponytail-audit`, `ponytail-debt`, `ponytail-gain`, `ponytail-help`
-- Cursor always-on rule: `rules/ponytail.mdc` (bootstrapped into projects)
-- Refresh: `bash scripts/sync-ponytail.sh`
-- Gate 3: `ponytail-review` runs parallel with `code-reviewer` and `security-reviewer`
+### Control plane (v2)
 
-**Release metrics** (Tier 2+): `ENGINEERING-METRICS.md` · `collect-release-metrics.sh` · `estimate-pipeline-tokens.sh` · skill `spec-release-metrics`
+| Capability | Where |
+|------------|--------|
+| Need → recipe × tier matrix (R/O/—) | `ENGINEERING-RECIPES.md` §0 |
+| Human APPROVED / override / waive | Playbook + all phase agents |
+| Anti-loops ≤2 (challenge, review, guardian, fix↔test) | Playbook + role agents |
+| Plan discipline (`agents_planned` / skipped / adapt) | `eng-orchestrator` + MEMORY |
+| Path-only spawn + Tier 2+ isolation | `eng-orchestrator` spawn allowlist · `spec-handoff` · v2.0.1 |
+| Principle 9 — no default cloud-vendor skills | Playbook + security/platform/sre agents |
+| Tier 1 ARCH-000 optional (durable boundary) | Recipes + bootstrap templates |
 
-**Token discipline** (P0–P3 shipped):
+### Token discipline & metrics
 
 | Item | Location |
 |------|----------|
-| P0 `spec-advisory` + `spec-token-budget` | skills + `rules/token-discipline.mdc` |
-| P0 `beforeSubmitPrompt` hook | `hooks/scripts/prompt-intent.sh` |
-| P1 meta recipes | `advisory-only`, `vendor-sync`, `docs-touch` in ENGINEERING-RECIPES.md |
-| P1 `spec-vendor-sync` | skill + `sync-ponytail.sh` |
-| P2 subagentStop compression nudge | `hooks/scripts/subagent-stop.sh` |
-| P3 journal distill | `scripts/distill-learning-journal.sh` |
+| `spec-advisory` + `spec-token-budget` | skills + `rules/token-discipline.mdc` |
+| `beforeSubmitPrompt` intent hook | `hooks/scripts/prompt-intent.sh` |
+| Meta recipes (`advisory-only`, `vendor-sync`, `docs-touch`) | `ENGINEERING-RECIPES.md` |
+| SubagentStop checkpoint + anti-summary nudge | `hooks/scripts/subagent-stop.sh` |
+| Learning-journal distill | `scripts/distill-learning-journal.sh` |
+| Release metrics + estimate (`minimal` / `--agents`) | `ENGINEERING-METRICS.md` · `spec-release-metrics` |
+
+### Ponytail
+
+Vendored from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT): six skills; Cursor `rules/ponytail.mdc`; `bash scripts/sync-ponytail.sh`; Gate 3 parallel with code/security review.
 
 ---
 
-## Next up — GitHub Copilot (Phase 2)
+## Near-term (post-v2.0.1) — maintainers
 
-**Priority #1** after the four supported platforms. Maintainer target; community PRs welcome.
+Prioritize **adoption and honesty of the control plane** before new platforms.
+
+| Priority | Item | Why |
+|----------|------|-----|
+| **1** | **Pilot matrix** | Run bug-fix T1, capability T1, hotfix in a real app; record plan-discipline + tokens via `spec-release-metrics` |
+| **2** | **APPROVED evidence** | Stronger “user-owned APPROVED” signal (named approver / checkpoint) — still honor-system today |
+| **3** | **Estimate ↔ matrix SoT** | Keep `estimate-pipeline-tokens.sh` locked to recipes matrix (avoid drift) |
+| **4** | **README / install tips** | Smoke paths and “start here” fully match need-first entry (reduce leftover `/spec-pipeline` as default) |
+| **5** | **Hotfix 48h review policy** | Document project-level ACK/backfill convention for deferred code-review |
+
+---
+
+## Next platform — GitHub Copilot (Phase 2)
+
+After near-term v2 hardening. Maintainer target; community PRs welcome.
 
 | Deliverable | Target |
 |-------------|--------|
-| `scripts/install-copilot.sh` | Symlink agents → `~/.github/agents/`, skills → `~/.github/skills/`, docs → `~/.github/specforge/` (or tool-native paths per Copilot docs) |
-| Bootstrap | `--platform copilot` → project `.github/agents/`, `.github/skills/` |
-| Entry | Project `AGENTS.md` + Copilot custom agents |
-| Parity | 20 agents, 15 skills, spec gates; hooks manual (same as Claude/Codex) |
+| `scripts/install-copilot.sh` | Agents/skills/docs → Copilot discovery paths |
+| Bootstrap | `--platform copilot` → project `.github/…` as needed |
+| Entry | Project `AGENTS.md` + Copilot custom agents (need-first, v2 doctrine) |
+| Parity | 20 agents where possible; hooks manual (same as Claude/Codex) |
 
-**Stretch:** Copilot-specific agent definitions under `.github/agents/`; ponytail via skills (rule TBD).
-
-Track progress: open issue `[platform] GitHub Copilot install adapter`. Label: `platform`, `copilot`, `next-up`.
+Track: issue `[platform] GitHub Copilot install adapter` · labels `platform`, `copilot`, `next-up`.
 
 ---
 
 ## Community wanted — additional AI tools
 
-We want **community contributions** for install scripts and bootstrap overlays. SpecForge is one harness (agents, skills, docs); each tool needs a thin adapter.
-
-**Copilot is next on the maintainer roadmap** (above). The table below is for other tools after Copilot, or parallel community work if you are not blocked on Copilot paths.
-
-### Target tools (not yet supported)
+One harness (agents, skills, docs); each tool gets a thin adapter. Copilot is next on the maintainer list; other tools welcome in parallel.
 
 | Priority | Tool | Likely install path | Notes | Status |
 |----------|------|---------------------|-------|--------|
-| **Next** | **GitHub Copilot** | `.github/agents/`, `.github/skills/` | Phase 2 — see [Next up](#next-up--github-copilot-phase-2) | **Next up** |
-| 2 | **ForgeCode** | `~/.forge/skills/`, `~/.forge/agents/`, `AGENTS.md` | Agent YAML differs (`id`, `tools:`); manual orchestration | Help wanted |
-| 3 | **Aider** | `.aider.conf.yml`, `AGENTS.md`, repo rules | No native subagents; skills → conventions in AGENTS.md | Help wanted |
-| 4 | **Windsurf** | `.windsurf/rules/` | Ponytail ships a rules file upstream | Help wanted |
+| **Next** | **GitHub Copilot** | `.github/agents/`, `.github/skills/` | Phase 2 | **Next up** |
+| 2 | **ForgeCode** | `~/.forge/…`, `AGENTS.md` | Different agent YAML | Help wanted |
+| 3 | **Aider** | `.aider.conf.yml`, `AGENTS.md` | No native subagents | Help wanted |
+| 4 | **Windsurf** | `.windsurf/rules/` | Ponytail upstream rules | Help wanted |
 | 5 | **Cline** | `.clinerules/` | Instruction-only | Help wanted |
 | 6 | **Kiro** | `.kiro/steering/` | Instruction-only | Help wanted |
 
-### What a good contribution includes
+### Good contribution checklist
 
-1. **`scripts/install-<tool>.sh`** — symlinks agents, skills, docs to the tool’s discovery paths (use `scripts/lib/specforge-install.sh`)
-2. **Bootstrap flag** — extend `scripts/bootstrap-project.sh --platform <tool>` if the tool needs project-local paths
-3. **Row in `docs/MULTI-TOOL.md`** — parity matrix + quickstart
-4. **Smoke test notes** — how you verified agents/skills load (screenshot or command output)
-5. **No fork of core playbook** — reuse `SPECFORGE_HOME` docs; adapt paths only
+1. `scripts/install-<tool>.sh` via `scripts/lib/specforge-install.sh`
+2. Bootstrap `--platform <tool>` when project-local paths are required
+3. Row in `MULTI-TOOL.md` (parity + need-first quickstart)
+4. Smoke notes (agents/skills load)
+5. **No fork of playbook/recipes** — reuse `SPECFORGE_HOME`; adapt paths only
+6. Ship **v2 doctrine** (need checklist, human APPROVED, path-only spawn) — not v1 full-pipeline defaults
 
-### Out of scope for v1 adapters
+### Out of scope for adapters
 
-- Reimplementing Cursor hooks (document manual checkpoint checklist instead)
-- Converting all 20 agents if the tool only supports AGENTS.md + skills (document reduced mode)
+- Reimplementing Cursor hooks (document manual checkpoint checklist)
+- Forcing all 20 agents if the tool only supports AGENTS.md + skills (document reduced mode)
 - Vendor-specific model routing
 
 ### How to contribute
 
-1. Open an issue: `[platform] install script for <tool>` — describe parity you can achieve
-2. Fork → branch `feat/install-<tool>`
-3. PR with install script + MULTI-TOOL.md + ROADMAP status update
-4. We merge when: install is idempotent, docs are clear, no secrets in repo
-
-Questions: open a GitHub issue with label `platform`.
+1. Issue: `[platform] install script for <tool>`
+2. Branch `feat/install-<tool>`
+3. PR: install + MULTI-TOOL + ROADMAP status
+4. Merge when: idempotent install, clear docs, no secrets
 
 ---
 
-## Planned (maintainers)
+## Later (maintainers)
 
 | Priority | Item | Description |
 |----------|------|-------------|
-| **1** | **`install-copilot.sh`** | GitHub Copilot — agents, skills, bootstrap (Phase 2) |
+| 1 | **`install-copilot.sh`** | After near-term pilots |
 | 2 | Release metrics dashboard | Optional viz over `.specs/metrics/releases/` |
-| 3 | Hook parity | Codex / OpenCode lifecycle hooks matching Cursor gate semantics |
+| 3 | Hook parity | Codex / OpenCode lifecycle hooks ≈ Cursor gate semantics |
 | 4 | Billing CSV ingest | Auto-fill Tier A token totals in release YAML |
-| 5 | Ponytail auto-sync | CI check that `vendor/ponytail/VERSION` matches upstream tag |
+| 5 | Ponytail auto-sync | CI: `vendor/ponytail/VERSION` matches upstream tag |
+| 6 | Harder APPROVED lock | Optional file/schema check so agents cannot silently flip status |
 
 ---
 
-## Principles (unchanged)
+## Principles
 
-- Specs before code (`.specs/` is source of truth)
-- Supported platforms get **real** skill files (not broken symlinks to `vendor/` in bootstrapped projects)
-- Third-party skills (Ponytail) stay MIT-attributed under `vendor/ponytail/`
+- **Specs before code** — `.specs/` is source of truth; chat is ephemeral
+- **Need-based sizing** — no default production recipe; omit/skip wins unless checklist flags risk
+- **Human gates** — user owns APPROVED / override / Critical & Blocking-drift waivers
+- **Principle 8** — checkpoint to disk, then path-only spawn; disk wins over chat summaries
+- **Supported platforms** get real skill files (not broken `vendor/` symlinks in bootstrapped projects)
+- **Third-party skills** (Ponytail) stay MIT-attributed under `vendor/ponytail/`
