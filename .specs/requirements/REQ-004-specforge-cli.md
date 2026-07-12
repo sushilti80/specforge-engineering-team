@@ -1,8 +1,9 @@
 # REQ-004: SpecForge CLI — packaging, install, upgrade, doctor
 
-**Status**: Approved (2026-07-12, user) — pending Q1/Q2 smoke results before ARCH-004
-**Date**: 2026-07-12 · **Owner**: requirements-analyst (draft) / **User** (APPROVED) · **Links**: ARCH-004 (pending) · TP-004 (pending) · ADR-006 (pending)
+**Status**: Approved (2026-07-12, user) — Q1/Q2 PASS; ARCH-004 R1 drafted (READY_FOR_APPROVAL)
+**Date**: 2026-07-12 · **Owner**: requirements-analyst (draft) / **User** (APPROVED) · **Links**: ARCH-004 (R1, pending APPROVED) · TP-004 (pending) · ADR-006..010 (pending)
 **Challenger R1**: C1–C3 Blocking resolved in-spec; C4–C10 Important/Nit addressed; see §9.
+**Q1/Q2 smoke (2026-07-12)**: BOTH PASS (user-confirmed). Symlink strategy confirmed for Cursor + Claude + OpenCode.
 
 ## 1. Problem
 
@@ -87,7 +88,7 @@ The pain is real: upgrading `sales_architect` from v1.x → v2.0.1 took four com
 - **`AGENTS.md` merge policy: overwrite-with-backup for MVP.** Managed-region fences deferred to post-MVP. `upgrade` writes the user's old `AGENTS.md` to `.specforge/backups/<ts>/` before overwriting, and prints the backup path. Users who customized `AGENTS.md` re-merge by hand from the backup. Q3 resolved: overwrite-with-backup now, fences later.
 - **`.specforge-version` format: exactly one semver `MAJOR.MINOR.PATCH`, optional trailing newline, no `v` prefix, no ranges.** Malformed = drift (AC-22).
 - **Fallback if Cursor does not follow two-hop symlinks (Q1 smoke):** `link` copies the plugin dir on Cursor (not symlinks); symlink strategy reserved for Claude/OpenCode. This constraint activates only if Q1 smoke fails — record the result before ARCH-004.
-- **Q1/Q2 smoke results (2026-07-12):** OS-level resolution **PASS** for both. Three-hop chain `~/.cursor/plugins/local/specforge-smoke-test → ~/.specforge/current → ~/.specforge/2.0.1 → <harness>` resolves via `readlink -f` to real files; `plugin.json` and agent files readable through the chain. Same for Claude `~/.claude/agents/specforge-smoke-test.md` two-hop. **Pending:** user restarts Cursor to confirm `specforge-smoke-test` appears as a loadable plugin (filesystem resolution is necessary but not sufficient — Cursor's plugin loader must also follow the chain). If Cursor does NOT load it, fallback constraint activates.
+- **Q1/Q2 smoke results (2026-07-12):** **BOTH PASS — confirmed by user.** Q1: Cursor loads plugin through three-hop symlink chain (`specforge-smoke-test → ~/.specforge/current → ~/.specforge/2.0.1 → <harness>`). Q2: Claude Code follows two-hop agent symlinks. **Symlink strategy confirmed for all tools (Cursor, Claude, OpenCode).** Fallback constraint (copy-on-Cursor) does **not** activate. ARCH-004 proceeds with symlink-first design; `bundle-agents: copy` remains available for Windows/shares/containers but is not the default path.
 
 **Risky assumptions (flag for challenger):**
 - **A1** — Tools (Cursor, Claude, OpenCode) reliably follow symlinks into `~/.specforge/<version>/`. Cursor plugin model copies files; does it follow a symlinked plugin dir? Needs smoke test before ARCH.
@@ -99,8 +100,8 @@ The pain is real: upgrading `sales_architect` from v1.x → v2.0.1 took four com
 
 ## 6. Open Questions
 
-- [x] **Q1** — Does Cursor follow a symlinked plugin dir at `~/.cursor/plugins/local/specforge-engineering-team → ~/.specforge/current`? **Filesystem PASS (2026-07-12):** three-hop chain resolves via `readlink -f`; `plugin.json` + agent files readable. **Pending user confirmation:** restart Cursor, check if `specforge-smoke-test` plugin loads. If yes → Q1 PASS, symlink strategy confirmed. If no → fallback constraint (§5) activates: copy on Cursor.
-- [x] **Q2** — Does Claude Code follow `~/.claude/agents/*.md` symlinks reliably? **Filesystem PASS (2026-07-12):** two-hop chain `~/.claude/agents/specforge-smoke-test.md → ~/.specforge/current/agents/verifier.md → <harness>` resolves; file readable. Claude already follows one-hop symlinks today (live `eng-orchestrator.md` works); OS resolves multi-hop transparently. **Confirmed PASS.**
+- [x] **Q1** — Does Cursor follow a symlinked plugin dir? **PASS (2026-07-12, user-confirmed):** Cursor loads plugin through three-hop symlink chain. Symlink strategy confirmed for all tools.
+- [x] **Q2** — Does Claude Code follow `~/.claude/agents/*.md` symlinks? **PASS (2026-07-12):** Two-hop chain resolves; Claude already follows one-hop today. Confirmed.
 - [ ] ~~Q3~~ — **Resolved:** overwrite-with-backup for MVP; managed-region fences deferred (see §5).
 - [ ] ~~Q4~~ — **Resolved for MVP:** `.specforge-version` one-liner (AC-22 format). `.specforge.yml` with `manifest_version:` deferred until bash CLI stabilizes.
 - [ ] ~~Q5~~ — **Resolved:** cosign/sigstore signing in-scope for MVP (see §5, AC-8, AC-17).
