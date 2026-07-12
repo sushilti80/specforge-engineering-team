@@ -40,13 +40,17 @@ jobs:
         env:
           COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          # Non-interactive: skip Sigstore ToS / tlog upload prompt in CI
+          COSIGN_YES: "true"
         run: |
           VERSION="$(cat VERSION)"
           if [[ -n "${COSIGN_KEY:-}" ]]; then
-            cosign sign-blob --key env://COSIGN_KEY \
+            # --tlog-upload=false: key-based detached .sig; consumers verify with cosign.pub
+            # (no Rekor upload, no interactive prompt)
+            cosign sign-blob --yes --tlog-upload=false --key env://COSIGN_KEY \
               --output-signature "specforge-content-${VERSION}.tar.gz.sig" \
               "specforge-content-${VERSION}.tar.gz"
-            cosign sign-blob --key env://COSIGN_KEY \
+            cosign sign-blob --yes --tlog-upload=false --key env://COSIGN_KEY \
               --output-signature specforge.sh.sig \
               specforge.sh
           else
