@@ -49,6 +49,53 @@ Agents, skills, and commands install to `~/.config/opencode/`.
 
 See [`docs/MULTI-TOOL.md`](docs/MULTI-TOOL.md) for parity details and per-tool quickstarts.
 
+### Option F — SpecForge CLI from GitHub Releases
+
+Tagged releases publish a content tarball and the CLI script (plus checksums and cosign signatures):
+
+| Asset | Purpose |
+|-------|---------|
+| `specforge-content-<ver>.tar.gz` | Agents, skills, docs, hooks, templates, scripts |
+| `specforge.sh` | Install / fetch / self-update CLI |
+| `*.sha256` | Integrity checksums |
+| `*.sig` | Cosign signatures (key-based, no Rekor upload) |
+
+```bash
+# Download CLI from the latest release, then fetch a pinned version
+curl -fsSL -o specforge.sh \
+  "https://github.com/sushilti80/specforge-engineering-team/releases/download/v2.0.2/specforge.sh"
+chmod +x specforge.sh
+
+# Point at the published public key (in this repo)
+export SPECFORGE_COSIGN_PUBKEY=/path/to/specforge-engineering-team/cosign.pub
+
+./specforge.sh fetch 2.0.2
+./specforge.sh versions
+```
+
+#### Verify release artifacts yourself
+
+```bash
+# SHA256
+shasum -a 256 -c specforge-content-2.0.2.tar.gz.sha256
+shasum -a 256 -c specforge.sh.sha256
+
+# Cosign (signatures are offline / not in the transparency log)
+cosign verify-blob --insecure-ignore-tlog --key cosign.pub \
+  --signature specforge-content-2.0.2.tar.gz.sig \
+  specforge-content-2.0.2.tar.gz
+
+cosign verify-blob --insecure-ignore-tlog --key cosign.pub \
+  --signature specforge.sh.sig \
+  specforge.sh
+```
+
+- Public key: [`cosign.pub`](cosign.pub) (safe to commit and share).
+- Private key stays in GitHub Actions secrets (`COSIGN_KEY` + `COSIGN_PASSWORD`); never commit `cosign.key`.
+- Escape hatch (not recommended): `SPECFORGE_ALLOW_UNSIGNED=1` skips cosign and uses SHA-only.
+
+Releases are cut by pushing a `v*` tag (see `.github/workflows/release.yml`) — not on every merge.
+
 ## After install — verify and run
 
 `install-all.sh` does **not** put agents inside a random project folder. It **symlinks** this repo into each tool’s user directory. Agents still live in this repo’s `agents/` folder.

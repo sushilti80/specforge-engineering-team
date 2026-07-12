@@ -59,6 +59,7 @@ Environment:
   SPECFORGE_HOME_DIR     Harness store (default: ~/.specforge)
   SPECFORGE_HARNESS      Override harness checkout path
   SPECFORGE_OFFLINE=1    Same as --offline
+  SPECFORGE_COSIGN_PUBKEY  Path to cosign.pub (required for signature verify)
   SPECFORGE_ALLOW_UNSIGNED=1  Skip cosign (SHA-only, not recommended)
 EOF
 }
@@ -192,11 +193,18 @@ mkdir -p "$SF_HOME/cache" "$SF_HOME/backups"
 
 verify_cosign() {
   local file="$1" sig_file="$2"
+  local pubkey="${SPECFORGE_COSIGN_PUBKEY:-}"
   if command -v cosign >/dev/null 2>&1; then
     if [[ -f "$sig_file" ]]; then
+      # Releases sign with --tlog-upload=false (key-based detached .sig).
+      # Cosign requires --insecure-ignore-tlog when the sig was never uploaded to Rekor.
+      if [[ -n "$pubkey" && -f "$pubkey" ]]; then
+        cosign verify-blob --insecure-ignore-tlog --key "$pubkey" \
+          --signature "$sig_file" "$file" 2>/dev/null && return 0
+      fi
+      # Keyless / bundle path (if a future release uploads to tlog)
       cosign verify-blob --certificate-identity-regexp='.*' --certificate-oidc-issuer-regexp='.*' \
         --signature "$sig_file" "$file" 2>/dev/null && return 0
-      cosign verify-blob --key "${SPECFORGE_COSIGN_PUBKEY:-}" --signature "$sig_file" "$file" 2>/dev/null && return 0
       return 2
     fi
     return 2
