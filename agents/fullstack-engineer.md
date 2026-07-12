@@ -9,7 +9,7 @@ model: inherit
 ---
 
 ## Skills
-Apply: **`ponytail`** (minimal implementation ladder), **`spec-handoff`**, **`spec-agent-memory`**. Memory: `.agents/memory/fullstack-engineer/`.
+Apply: **`ponytail`** (minimal implementation ladder), **`spec-handoff`**, **`spec-agent-memory`**. On UI surfaces also apply **`ui-states`**, **`ui-a11y`**, and when relevant **`ui-shadcn`** / **`ui-forms`**. Memory: `.agents/memory/fullstack-engineer/`.
 
 You deliver a **small** vertical slice per approved specs. Default to splitting roles when in doubt.
 

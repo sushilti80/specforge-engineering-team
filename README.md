@@ -1,6 +1,6 @@
 # SpecForge Engineering Team
 
-**SpecForge** is an installable spec-driven engineering team for **Cursor**, **Claude Code**, **Codex CLI**, and **OpenCode**: 20 agents, 19 skills, 5 checkpoint hooks (Cursor), **token discipline**, **release benchmarking**, project memory, and a bootstrap template.
+**SpecForge** is an installable spec-driven engineering team for **Cursor**, **Claude Code**, **Codex CLI**, and **OpenCode**: 20 agents, 23 skills, 5 checkpoint hooks (Cursor), **token discipline**, **release benchmarking**, project memory, and a bootstrap template.
 
 > Specs are source of truth. Chat is ephemeral. Memory learns on disk. Tokens are measured, not guessed.
 
@@ -189,6 +189,7 @@ The orchestrator picks the next agents (requirements-analyst → challenger → 
 |-----------|-------|---------|
 | **Agents** | 20 | Orchestrator, analysts, implementers, QA, reviewers, verifier, challenger |
 | **Spec skills** | 13 | Pipeline, recipes, handoffs, memory, metrics, advisory, token budget, vendor sync |
+| **UI skills** | 4 | `ui-shadcn`, `ui-forms`, `ui-a11y`, `ui-states` (functional UI for frontend/fullstack) |
 | **Ponytail skills** | 6 | Minimal code ladder, diff/repo bloat review, debt ledger ([upstream](https://github.com/DietrichGebert/ponytail)) |
 | **Rules** | 4 | Spec gates, agent memory, ponytail, token discipline (Cursor) |
 | **Commands** | 3 | `/spec-pipeline`, `/eng-orchestrator`, `/bootstrap-spec-project` |
@@ -360,6 +361,7 @@ specforge-engineering-team/
 ├── agents/
 ├── skills/
 │   ├── spec-*              # 13 spec-driven skills (incl. metrics, advisory, token budget)
+│   ├── ui-*                # 4 functional UI skills (shadcn, forms, a11y, async states)
 │   └── ponytail*           # 6 ponytail skills (synced from upstream)
 ├── rules/                  # spec-driven, agent-memory, ponytail, token-discipline
 ├── commands/
