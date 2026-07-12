@@ -1,7 +1,7 @@
 # REQ-004: SpecForge CLI — packaging, install, upgrade, doctor
 
-**Status**: Approved (2026-07-12, user) — Q1/Q2 PASS; ARCH-004 R1 drafted (READY_FOR_APPROVAL)
-**Date**: 2026-07-12 · **Owner**: requirements-analyst (draft) / **User** (APPROVED) · **Links**: ARCH-004 (R1, pending APPROVED) · TP-004 (pending) · ADR-006..010 (pending)
+**Status**: Approved (2026-07-12, user) — Q1/Q2 PASS; ARCH-004 approved; implementation in progress
+**Date**: 2026-07-12 · **Owner**: requirements-analyst (draft) / **User** (APPROVED) · **Links**: ARCH-004 (Approved) · TP-004 (draft) · ADR-006..010 (recorded)
 **Challenger R1**: C1–C3 Blocking resolved in-spec; C4–C10 Important/Nit addressed; see §9.
 **Q1/Q2 smoke (2026-07-12)**: BOTH PASS (user-confirmed). Symlink strategy confirmed for Cursor + Claude + OpenCode.
 

@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync Ponytail into harness (ADR-009)
+        run: bash scripts/sync-ponytail.sh
+
+      - name: Write VERSION from plugin.json
+        run: echo "$(jq -r .version .cursor-plugin/plugin.json)" > VERSION
+
+      - name: Build content tarball
+        run: |
+          VERSION="$(cat VERSION)"
+          tar czf "specforge-content-${VERSION}.tar.gz" \
+            agents/ skills/ docs/ commands/ hooks/ rules/ templates/ scripts/ vendor/ VERSION .cursor-plugin/
+          sha256sum "specforge-content-${VERSION}.tar.gz" > "specforge-content-${VERSION}.tar.gz.sha256"
+
+      - name: Package CLI script
+        run: |
+          cp scripts/specforge.sh specforge.sh
+          chmod +x specforge.sh
+          sha256sum specforge.sh > specforge.sh.sha256
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Sign release artifacts
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          VERSION="$(cat VERSION)"
+          if [[ -n "${COSIGN_KEY:-}" ]]; then
+            cosign sign-blob --key env://COSIGN_KEY \
+              --output-signature "specforge-content-${VERSION}.tar.gz.sig" \
+              "specforge-content-${VERSION}.tar.gz"
+            cosign sign-blob --key env://COSIGN_KEY \
+              --output-signature specforge.sh.sig \
+              specforge.sh
+          else
+            echo "::warning::COSIGN_KEY not configured — publishing SHA256 only"
+            printf '' > "specforge-content-${VERSION}.tar.gz.sig"
+            printf '' > specforge.sh.sig
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            specforge-content-*.tar.gz
+            specforge-content-*.tar.gz.sha256
+            specforge-content-*.tar.gz.sig
+            specforge.sh
+            specforge.sh.sha256
+            specforge.sh.sig

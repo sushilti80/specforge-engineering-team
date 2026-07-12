@@ -1,7 +1,7 @@
 # ARCH-004: SpecForge CLI — system design
 
-**Status**: Draft R1 (READY_FOR_APPROVAL) — Challenger R0 BLOCKING resolved; see §12
-**Date**: 2026-07-12 · **Owner**: architect (draft) / **User** (APPROVED) · **Links**: REQ-004 (Approved) · TP-004 (pending) · ADR-006..010 (pending)
+**Status**: Approved (2026-07-12, user) — Challenger R0 resolved in R1; ready for implementation
+**Date**: 2026-07-12 · **Owner**: architect (draft) / **User** (APPROVED) · **Links**: REQ-004 (Approved) · TP-004 (draft) · ADR-006..010 (recorded)
 
 ## 1. Overview
 

@@ -3,3 +3,4 @@
 .cursor/plugins/local/*.bak
 .idea/
 .vscode/
+tmp/

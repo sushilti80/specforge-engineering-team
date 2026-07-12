@@ -4,6 +4,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [[ -f "$SCRIPT_DIR/deprecation-banner.sh" ]]; then
+  # shellcheck source=deprecation-banner.sh
+  source "$SCRIPT_DIR/deprecation-banner.sh"
+  specforge_deprecation_banner
+fi
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATE_ROOT="$PLUGIN_ROOT/templates/spec-driven-app"
 PLATFORM="all"
