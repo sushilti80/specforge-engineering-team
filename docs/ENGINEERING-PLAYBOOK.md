@@ -363,10 +363,10 @@ Authoritative schema: skill **`spec-handoff`**. Every phase end **must** include
 **Key decisions:**
 - [max 5 bullets]
 
-**For next agent — paste into their prompt:**
+**For next agent — paths only (do not paste this HANDOFF block):**
 - Spec files to read: [paths]
-- Constraints: [hard constraints]
-- Open risks: [unresolved items]
+- Constraints: [hard constraints — one line each, or "see spec"]
+- Open risks: [paths or IDs only — not narrative]
 
 **Blockers:** [none | list]
 
@@ -384,7 +384,7 @@ Authoritative schema: skill **`spec-handoff`**. Every phase end **must** include
 ---
 ```
 
-Orchestrator also tracks: **Recipe**, **Tier**, **Phase**, **Next agent**, **Gate evidence paths** (SHA, test report, finding IDs). Delegation prompts stay **path-only** — do not paste this HANDOFF prose wholesale into the next subagent.
+Orchestrator also tracks: **Recipe**, **Tier**, **Phase**, **Next agent**, **Gate evidence paths** (SHA, test report, finding IDs). Delegation prompts stay **path-only** — do not paste this HANDOFF prose, chat summaries, or tool logs into the next subagent.
 
 ### Approval authority (human-gated)
 
@@ -460,20 +460,25 @@ Recommend a new chat when:
 - Parent context is long (rough guide: >30 turns or repeated re-explaining)
 - Switching recipe (`bug-fix` → `greenfield-feature`)
 
+**Tier 2+ isolation (required):** Start a **new parent Agent chat** (or equivalently isolated spawn with path-only seed) for **challenger Round 1**, **Gate 3 reviewers**, **verifier**, and **spec-guardian** — do not run those roles inside a long orchestrator thread that already holds phase summaries.
+
 Seed the new chat with:
 
 ```
 Recipe: [id] | Tier: [0-3] | Phase: [next]
-Read: .cursor/agent-memory/_project/specs-index.md
+Read: .agents/memory/_project/specs-index.md
 Read: [spec paths only]
-Do not rely on prior chat summaries.
+Read: [evidence paths if any]
+Do not use prior chat summaries.
+If parent context contradicts disk → disk wins.
 ```
 
 #### Delegation prompt limits (orchestrator)
 
 - **≤500 words** per subagent delegation
 - **Mostly file paths**, recipe, tier, phase, blockers
-- **Never paste** prior subagent prose, tool logs, or HANDOFF narratives—only paths
+- **Never paste** prior subagent prose, tool logs, HANDOFF narratives, or **conversation summaries** — only paths
+- Use the **spawn allowlist** template in `agents/eng-orchestrator.md`
 
 #### When **not** to reset
 

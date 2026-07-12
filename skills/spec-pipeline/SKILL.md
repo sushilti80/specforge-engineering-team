@@ -63,7 +63,7 @@ Full ASCII of every agent is a **Tier 3 ceiling**, not the default path. See rec
 
 ## 5. Principle 8
 
-After each gate: update specs + memory (include **agents_planned**) → optional GATE file → **fresh subagent** with paths only.
+After each gate: update specs + memory (include **agents_planned**) → optional GATE file → **fresh subagent** with spawn allowlist (paths only). Never attach chat summaries. Tier 2+: isolate challenger / reviewers / verifier / guardian in a new parent chat when the orchestrator thread is long.
 
 ## 6. Invoke map
 

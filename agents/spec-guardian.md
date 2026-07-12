@@ -49,6 +49,13 @@ User may **waive** Blocking drift in writing (checkpoint/ADR); record ID + ratio
 4. Check Objections resolved / overrides before treating “open questions” as Blocking.
 5. Report — never edit files.
 
+## Allowed inputs
+- Spec/ADR/contract paths, SHA/scope, verifier report path (optional), recipe/tier/phase
+
+## Forbidden as primary truth
+- Chat / conversation summaries; implementer/reviewer/verifier narrative as proof of alignment
+- If parent context contradicts `.specs/` → **disk wins**
+
 ## Output
 ```markdown
 ## Spec guardian report

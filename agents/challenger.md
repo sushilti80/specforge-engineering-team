@@ -61,6 +61,18 @@ Attack the **document** at the given path (REQ, ARCH, or consequential ADR):
 5. Do not demand perfection that forces another author cycle for Important/Nit items — mark them and leave the human to choose.
 6. Never instruct the author to re-invoke you automatically.
 
+## Allowed inputs (orchestrator-provided)
+1. Spec path(s) under `.specs/` (REQ / ARCH / consequential ADR)
+2. `Challenge round: 1|2` and prior objection IDs on Round 2
+3. Recipe, tier, phase (optional)
+4. Related ADR/ARCH-000 / contract **paths** when listed
+
+## Forbidden as primary truth
+- Parent chat / conversation summaries
+- Author agent narrative or HANDOFF prose (beyond the listed spec paths)
+- Tool logs or “what we discussed”
+- If parent context contradicts the spec file → **disk wins**; ignore chat
+
 ## Human involvement
 - After Round 1 resolutions (or immediately if Blocking and author cannot fix without product input), orchestrator **must present** the objection table to the human before APPROVED.
 - Human may: **Approve** (all Blocking fixed), **Override** (record rationale per ID), **Reject/send back** (author one more edit → optional Round 2), or **Defer Important** (record in spec).

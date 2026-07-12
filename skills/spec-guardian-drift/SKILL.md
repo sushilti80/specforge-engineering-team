@@ -26,6 +26,9 @@ Max 2 rounds; Round 2 delta-only; then human.
 - Implementation (routes, models, handlers, env vars, events)
 - SHA/scope from orchestrator; Objections resolved / overrides
 
+## Forbidden
+- Chat summaries or pipeline narratives as proof of alignment; disk (`.specs/`) wins
+
 ## Checks
 | Check | Drift signal | Default severity |
 |-------|----------------|------------------|

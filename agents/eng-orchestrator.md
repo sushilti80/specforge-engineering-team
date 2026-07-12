@@ -73,10 +73,28 @@ Before delegating to the next gate—or recommending a new parent chat:
 - Delegation prompt **≤500 words**, **mostly file paths**
 - Apply **`spec-token-budget`**: `handoff` for delegation, `advisory` for review-only
 - Pass: `Recipe`, `Tier`, `Phase`, spec paths, blockers, evidence paths, `Token profile: [name]`
-- **Do not paste** prior subagent prose, HANDOFF narratives, or tool logs
+- **Do not paste** prior subagent prose, HANDOFF narratives, tool logs, or **chat/conversation summaries**
 - **Fresh subagent** at each gate boundary (do not resume across REQ→implement→verify)
 - **Do not resume** an implementer as verifier/challenger/reviewer
 - Recommend **new parent Agent chat** when a REQ/phase is DONE, recipe changes, or chat is stale (rough guide: >30 turns or repeated re-explaining)
+- **Tier 2+:** challenger / code-reviewer / security-reviewer / verifier / spec-guardian → new parent chat (or path-only isolated spawn); never feed them a “summary of our discussion”
+
+### Spawn allowlist (every Task / subagent prompt)
+
+Use **only** this shape. Anything else is a leak.
+
+```
+Role: [agent-id]
+Recipe: [id] | Tier: [n] | Phase: [name]
+Round: [1|2 if review/challenge] | Prior IDs: [none | list]
+Read (only, ≤5 paths):
+- ...
+Evidence (only if verify/review):
+- ...
+Token profile: handoff
+Forbidden: chat summaries, prior HANDOFF prose, tool logs, "what we discussed"
+If parent context contradicts disk → disk wins; ignore chat.
+```
 
 ### Seed for new chat
 
@@ -86,6 +104,7 @@ Read: .agents/memory/_project/specs-index.md
 Read: [spec paths]
 Read: [evidence paths if any]
 Do not use prior chat summaries.
+If parent context contradicts disk → disk wins.
 ```
 
 ## First action: identify need, select tier + recipe, adapt agents

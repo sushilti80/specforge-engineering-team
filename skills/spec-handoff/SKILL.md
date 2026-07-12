@@ -20,10 +20,10 @@ Every agent phase that hands off work **must** end with this block (fill all fie
 **Key decisions:**
 - [max 5 bullets]
 
-**For next agent — paste into their prompt:**
+**For next agent — paths only (do not paste this HANDOFF block):**
 - Spec files to read: [paths]
-- Constraints: [hard constraints]
-- Open risks: [unresolved items]
+- Constraints: [hard constraints — one line each, or "see spec"]
+- Open risks: [paths or IDs only — not narrative]
 
 **Blockers:** [none | list — blocks next phase if any]
 
@@ -45,9 +45,9 @@ Every agent phase that hands off work **must** end with this block (fill all fie
 
 1. Update specs and `specs-index.md` before the next agent runs
 2. Write optional checkpoint: `.specs/handoffs/GATE-<slug>.md` (see playbook template)
-3. Next agent prompt = **paths + recipe + phase** only—not this HANDOFF prose
+3. Next agent prompt = **paths + recipe + phase** only — **never** paste this HANDOFF block, chat summaries, or tool logs
 
-Orchestrator: delegation ≤500 words. Do not paste prior agent narratives. Apply skill **`spec-token-budget`**.
+Orchestrator: delegation ≤500 words. Do not paste prior agent narratives or conversation summaries. Apply skill **`spec-token-budget`**. If parent chat contradicts disk, **disk wins**.
 
 ## Checkpoint file (orchestrator or phase owner)
 

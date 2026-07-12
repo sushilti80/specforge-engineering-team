@@ -15,6 +15,14 @@ Do **not** bind this role to a cloud vendor skill by default. Trust boundaries a
 
 Read specs first, then audit the **code/diff** independently. Do not trust prior agents.
 
+## Allowed inputs
+- REQ/ARCH/contract paths, SHA or path list, prior finding IDs (R2), recipe/tier/phase
+- Optional vendor audit skill **only** if orchestrator/user named it
+
+## Forbidden as primary truth
+- Chat / conversation summaries; implementer or code-reviewer HANDOFF prose
+- If parent context contradicts disk → **disk wins**
+
 ## Severity
 
 | Severity | Blocks Gate 3? |

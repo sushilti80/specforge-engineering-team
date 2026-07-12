@@ -24,8 +24,8 @@ disable-model-invocation: true
 
 1. **Verdict first** — 3 bullets before detail.
 2. **No tool dumps** — >30 lines of output → summarize or write file and cite path.
-3. **Delegation** — orchestrator ≤500 words, mostly paths (Principle 8).
-4. **HANDOFF** — max 5 key decisions; next agent gets paths not this block pasted.
+3. **Delegation** — orchestrator ≤500 words, mostly paths (Principle 8). Use spawn allowlist; **never** attach conversation summaries.
+4. **HANDOFF** — max 5 key decisions; next agent gets paths — **do not paste this HANDOFF block**.
 5. **External fetch** — prefer `raw.githubusercontent.com`; skip HTML repo pages.
 6. **Uploads** — if user attached a doc, do not re-fetch the same URL.
 
@@ -35,9 +35,9 @@ If response or HANDOFF feels long:
 
 - Drop repeated playbook explanations — cite `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md`.
 - Replace paragraphs with a table.
-- Set **For next agent** to path list only.
+- Set **For next agent — paths only** to a path list (never a chat summary).
 
-Hook reminder: subagentStop may ask for compression before next delegation.
+Hook reminder: subagentStop may ask for compression before next delegation. Do not attach a chat summary to the next spawn.
 
 ## Orchestrator
 

@@ -4,7 +4,7 @@ Last updated: 2026-07-11
 
 ## Shipped (supported today)
 
-**Current release:** [v2.0.0](RELEASE-v2.0.0.md) — need-based recipes, human APPROVED gates, ≤2-round anti-loops, Tier-1 ARCH-optional.
+**Current release:** [v2.0.1](RELEASE-v2.0.1.md) — anti-leak spawn allowlist + path-only HANDOFF ([v2.0.0](RELEASE-v2.0.0.md) need-based control plane).
 
 | Platform | Install | Agents | Skills | Hooks | Ponytail |
 |----------|---------|--------|--------|-------|----------|

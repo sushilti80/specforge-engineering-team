@@ -22,7 +22,8 @@ Epistemic isolation: verify against **REQ/BUG + code + cited tests**, not the pi
 
 ## Forbidden as primary truth
 - Implementer/reviewer/architect HANDOFF prose
-- "Done" claims from any agent
+- Chat "Done" claims or conversation summaries
+- If parent context contradicts listed inputs → disk wins
 
 ## Checklist
 1. List every in-scope acceptance criterion (and BUG expected behavior).

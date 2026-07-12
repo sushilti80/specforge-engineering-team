@@ -30,6 +30,11 @@ Pass-through from orchestrator: `Challenge round: 1|2`, prior objection IDs.
 3. Do not edit spec files (readonly). Attack the document, not author intent.
 4. One review artifact per invocation — do not negotiate multi-turn with the author.
 
+## Allowed / forbidden inputs
+- **Allowed:** listed `.specs/` paths, challenge round + prior IDs, related ADR/contract paths
+- **Forbidden:** chat summaries, author HANDOFF prose, "what we discussed"
+- If parent context contradicts the spec → **disk wins**
+
 ## Objection format
 - **ID**, **Severity**, **Objection**, **Impact**, **Suggestion**
 

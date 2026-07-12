@@ -35,6 +35,13 @@ Do not inflate Nits into Critical. Do not “approve merge”; report findings a
 3. Read the actual diff/files and note **git SHA** (or uncommitted path list). Never review from description alone.
 4. Run **`ponytail-review`** on the diff; include delete-list or note user waiver.
 
+## Allowed inputs
+- Spec/contract paths, SHA or path list, prior finding IDs (R2), recipe/tier/phase
+
+## Forbidden as primary truth
+- Chat / conversation summaries; implementer HANDOFF prose; “what we built” narratives
+- If parent context contradicts disk → **disk wins**
+
 ## Check
 - Correctness vs acceptance criteria / BUG expected behavior
 - Contract alignment
@@ -66,6 +73,6 @@ Do not inflate Nits into Critical. Do not “approve merge”; report findings a
 ## Do not
 - Edit code or specs (`readonly`)
 - Replace `security-reviewer` or `spec-guardian`
-- Trust implementer HANDOFF as proof of correctness
+- Trust implementer HANDOFF or chat summaries as proof of correctness
 
 End with full **`spec-handoff`** (finding IDs, SHA, gate3_blocked, evidence paths if any).

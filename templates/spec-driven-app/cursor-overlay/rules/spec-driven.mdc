@@ -11,10 +11,10 @@ Follow `SPECFORGE_HOME/ENGINEERING-PLAYBOOK.md` and **`ENGINEERING-RECIPES.md` �
 2. **Human APPROVED:** agents leave REQ/ARCH as `DRAFT` (or `READY_FOR_APPROVAL`). Only the user sets `Status: APPROVED`. Do not implement gated work while DRAFT.
 3. **Tier 1 features:** REQ `APPROVED` required before implementers. ARCH only if a durable boundary is crossed (schema, public API, security, deploy, framework) or tier ≥ 2.
 4. **Tier 2–3:** follow recipe×tier matrix (architect, challenger, reviewers, guardian as **R**).
-5. **Primary sources:** `.specs/` files — not chat summaries.
+5. **Primary sources:** `.specs/` files — not chat summaries. When spawning subagents: **path-only** prompts (spawn allowlist in eng-orchestrator); never include conversation summaries. Prefer a new parent Agent chat if the thread already holds phase summaries (Tier 2+ required for challenger / reviewers / verifier / guardian).
 6. **Contracts** under `.specs/contracts/` when APIs/models change (proposals until accepted).
 7. **ADRs** append-only; supersede with new files.
 8. **Agent memory:** `.agents/memory/` (`spec-agent-memory`). Orchestrator must persist `agents_planned` / skipped.
-9. **Principle 8:** checkpoint specs + memory before gate transitions; paths-only delegation; fresh subagent per gate.
+9. **Principle 8:** checkpoint specs + memory before gate transitions; paths-only delegation; fresh subagent per gate. If parent chat contradicts disk → **disk wins**.
 
 When starting work: run the need checklist, then ask which REQ/ARCH/BUG IDs apply or create them first.

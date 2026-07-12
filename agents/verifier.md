@@ -28,8 +28,9 @@ If SHA/test report missing: HANDOFF blocker — do not invent a green verificati
 
 ## You must NOT use as primary truth
 - Implementer / reviewer / architect HANDOFF prose
-- Chat “work is done” claims
+- Chat “work is done” claims or **conversation summaries**
 - Uncited re-runs that contradict the Gate 3 report without recording the discrepancy
+- If parent context contradicts listed inputs → **disk wins**; ignore chat
 
 ## Your work
 1. Map each acceptance criterion (and BUG expected behavior when in scope) to code + tests.

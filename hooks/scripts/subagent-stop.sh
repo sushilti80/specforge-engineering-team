@@ -67,7 +67,8 @@ def main() -> None:
         "(2) update `.agents/memory/_project/specs-index.md`, "
         "(3) update orchestrator MEMORY.md, "
         "(4) optionally write `.specs/handoffs/GATE-*.md`. "
-        "Then delegate to the next agent with spec paths only — fresh subagent, no prose paste."
+        "Then delegate with the spawn allowlist (paths only) — fresh subagent. "
+        "Do not attach a chat summary, HANDOFF prose, or tool logs to the next spawn."
     )
     if spec_touch:
         msg += " Spec or memory files were modified — confirm learning-journal and HANDOFF memory paths."
