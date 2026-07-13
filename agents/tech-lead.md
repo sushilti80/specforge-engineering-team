@@ -1,5 +1,6 @@
 ---
 name: tech-lead
+id: tech-lead
 description: >-
   DEPRECATED for SpecForge production recipes. Legacy spike-only planner when no
   .specs/ exist (Tier 0 / advisory). Never use for formal features — redirect to

@@ -1,5 +1,6 @@
 ---
 name: mobile-engineer
+id: mobile-engineer
 description: >-
   Mobile implementer for iOS, Android, React Native, or Flutter. Use after
   orchestrator gate allows implementers (REQ APPROVED; ARCH when required).

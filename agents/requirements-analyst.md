@@ -1,5 +1,6 @@
 ---
 name: requirements-analyst
+id: requirements-analyst
 description: >-
   Requirements analyst. Use when turning human intent into testable REQ specs in
   .specs/requirements/. Use before architect or any implementer runs. Leaves REQ

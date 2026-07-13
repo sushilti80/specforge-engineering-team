@@ -1,5 +1,6 @@
 ---
 name: verifier
+id: verifier
 description: >-
   Readonly verification against APPROVED REQ (and BUG when applicable). Use after
   test-runner with orchestrator-provided SHA, test report, and waiver ledger.

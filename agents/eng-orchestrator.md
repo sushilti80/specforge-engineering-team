@@ -1,5 +1,6 @@
 ---
 name: eng-orchestrator
+id: eng-orchestrator
 description: >-
   Spec-driven orchestrator with workflow recipes. Identifies work type and
   tier, checkpoints state at gate boundaries, delegates with paths only

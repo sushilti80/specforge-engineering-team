@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "__SPECFORGE_BRIDGE__ --platform copilot --script session-start.sh --event sessionStart --specforge",
+        "timeoutSec": 10
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "__SPECFORGE_BRIDGE__ --platform copilot --script prompt-intent.sh --event userPromptSubmitted --specforge",
+        "timeoutSec": 10
+      }
+    ],
+    "subagentStop": [
+      {
+        "type": "command",
+        "bash": "__SPECFORGE_BRIDGE__ --platform copilot --script subagent-stop.sh --event subagentStop --specforge",
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "matcher": "edit|write|apply_patch",
+        "type": "command",
+        "bash": "__SPECFORGE_BRIDGE__ --platform copilot --script after-spec-edit.sh --event postToolUse --specforge",
+        "timeoutSec": 10
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "__SPECFORGE_BRIDGE__ --platform copilot --script session-stop.sh --event agentStop --specforge",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

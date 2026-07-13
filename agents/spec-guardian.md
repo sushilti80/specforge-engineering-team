@@ -1,5 +1,6 @@
 ---
 name: spec-guardian
+id: spec-guardian
 description: >-
   Readonly Gate 4 drift auditor. Compares .specs/ (and contracts/ADRs) to the
   repo after verification. Blocking drift holds DONE; advisory does not. Max 2

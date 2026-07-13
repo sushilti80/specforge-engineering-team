@@ -1,5 +1,6 @@
 ---
 name: fullstack-engineer
+id: fullstack-engineer
 description: >-
   Vertical-slice implementer for small API+UI changes owned by one agent. Use
   after orchestrator gate allows implementers. Prefer split backend/frontend when

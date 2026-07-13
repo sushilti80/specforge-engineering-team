@@ -1,5 +1,6 @@
 ---
 name: frontend-engineer
+id: frontend-engineer
 description: >-
   Frontend implementer for UI-only work when API contracts are frozen. Use after
   orchestrator gate allows implementers (REQ APPROVED; ARCH when required).

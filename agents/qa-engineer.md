@@ -1,5 +1,6 @@
 ---
 name: qa-engineer
+id: qa-engineer
 description: >-
   QA strategy from APPROVED REQ (plus ARCH/contracts risks). Writes
   .specs/test-plans/TP-NNN.md. Does not write app code or edit REQ. Use before

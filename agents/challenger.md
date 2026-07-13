@@ -1,5 +1,6 @@
 ---
 name: challenger
+id: challenger
 description: >-
   Adversarial reviewer for REQ/ARCH (and consequential ADRs). One primary
   challenge round per artifact, optional delta re-check, then human decision.

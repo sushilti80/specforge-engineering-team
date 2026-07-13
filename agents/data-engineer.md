@@ -1,5 +1,6 @@
 ---
 name: data-engineer
+id: data-engineer
 description: >-
   Data-layer implementer for schemas, migrations, ETL, and warehouses. Use after
   orchestrator gate allows implementers. Prefers data work over backend when the

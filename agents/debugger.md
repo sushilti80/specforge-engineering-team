@@ -1,5 +1,6 @@
 ---
 name: debugger
+id: debugger
 description: >-
   Debugging specialist for defects and failing tests. Writes/updates BUG-NNN,
   isolates root cause, proposes minimal fix. Prefers diagnose-then-hand-off to

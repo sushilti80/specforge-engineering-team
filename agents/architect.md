@@ -1,5 +1,6 @@
 ---
 name: architect
+id: architect
 description: >-
   Architect. Use after REQ is APPROVED (or for ARCH-000 / ADR-only maintenance
   and infra recipes) to produce ARCH specs, ADRs, and contracts. Never implement

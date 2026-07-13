@@ -4,4 +4,6 @@
 .idea/
 .vscode/
 tmp/
+__pycache__/
+*.pyc
 cosign.key

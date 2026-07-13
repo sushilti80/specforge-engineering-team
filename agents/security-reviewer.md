@@ -1,5 +1,6 @@
 ---
 name: security-reviewer
+id: security-reviewer
 description: >-
   Readonly security audit against REQ/ARCH trust boundaries. Use for auth, PII,
   payments, public APIs, IAM. Critical blocks Gate 3; max 2 review rounds then

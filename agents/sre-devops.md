@@ -1,5 +1,6 @@
 ---
 name: sre-devops
+id: sre-devops
 description: >-
   CI/CD, containers, deploy wiring, and observability implementer. Use when ARCH
   defines deploy/ops needs. Owns pipelines and runtime ops; leaves IaC modules to

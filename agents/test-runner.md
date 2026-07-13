@@ -1,5 +1,6 @@
 ---
 name: test-runner
+id: test-runner
 description: >-
   Runs tests per TP/REQ scope and project commands after implementation. Fixes
   harness/broken tests with capped loops; escalates product bugs. Produces durable

@@ -1,4 +1,4 @@
-# SpecForge Engineering Team (Codex global)
+# SpecForge Engineering Team (Copilot global)
 
 > Specs are source of truth. Chat is ephemeral. Memory learns on disk (Principle 8).  
 > Control plane: need → smallest recipe × tier → human APPROVED → ≤2-round anti-loops.
@@ -7,18 +7,26 @@
 
 Resolve playbook and recipes from the first path that exists:
 
-1. `$HOME/.codex/specforge/`
-2. `$HOME/.config/opencode/specforge/`
-3. `$HOME/.cursor/` (Cursor install)
+1. `$HOME/.copilot/specforge/`
+2. `$HOME/.codex/specforge/`
+3. `$HOME/.config/opencode/specforge/`
 4. `$HOME/.claude/docs/specforge/`
+5. `$HOME/.cursor/` (Cursor install)
 
 Files: `ENGINEERING-PLAYBOOK.md`, `ENGINEERING-RECIPES.md` **§0**, `MULTI-TOOL.md`
+
+For **Copilot Cloud Agent** (no `$HOME` access), bootstrap vendors these into
+`.github/` and `scripts/specforge-hooks/` — see the bootstrap section below.
 
 ## Project layout (after bootstrap)
 
 - `.specs/` — requirements, architecture, ADRs, contracts (source of truth)
 - `.agents/memory/` — durable agent memory (commit to git)
 - `AGENTS.md` — project-level instructions (this file is global; projects have their own)
+- `.github/agents/*.agent.md` — Copilot custom agents (cloud-safe)
+- `.github/skills/` — vendored skills (cloud-safe)
+- `.github/hooks/specforge.json` — Copilot hooks (relative paths to vendored scripts)
+- `scripts/specforge-hooks/` — vendored `bridge.py` + core hook scripts
 
 ## Start work
 
@@ -37,7 +45,7 @@ Act as **eng-orchestrator**: run need checklist → pick **smallest** recipe × 
 
 ## Gate checkpoint (mandatory)
 
-Hooks (when trusted via Codex `/hooks`) nudge this automatically. Still verify before the next phase:
+Hooks (when trusted) nudge this automatically. Still verify before the next phase:
 
 1. Update `.specs/` files if changed
 2. Update `.agents/memory/_project/specs-index.md`
@@ -46,11 +54,13 @@ Hooks (when trusted via Codex `/hooks`) nudge this automatically. Still verify b
 
 Delegate with **file paths only** (≤500 words). Do not paste prior agent prose.
 
-Global hooks live in `~/.codex/hooks.json` (installed by `install-codex.sh`). After install or SpecForge upgrade, run `/hooks` and trust SpecForge entries.
+**CLI hooks** live in `~/.copilot/hooks/specforge.json` (installed by `install-copilot.sh`).
+**Cloud Agent hooks** live in `.github/hooks/specforge.json` (vendored by `bootstrap-project.sh --platform copilot`) and reference `scripts/specforge-hooks/bridge.py` via relative paths. Commit `.github/` and `scripts/specforge-hooks/` so the cloud runner can execute them.
 
 ## Skills
 
-Load on demand from `$HOME/.agents/skills/`: `spec-pipeline`, `spec-recipes`, `spec-handoff`, `spec-agent-memory`, and role-specific spec-* skills.
+Load on demand. CLI: `$HOME/.agents/skills/`. Cloud: `.github/skills/`.
+Available: `spec-pipeline`, `spec-recipes`, `spec-handoff`, `spec-agent-memory`, and role-specific spec-* skills.
 
 ## First new app (typical Tier 1)
 

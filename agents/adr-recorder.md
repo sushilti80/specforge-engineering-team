@@ -1,5 +1,6 @@
 ---
 name: adr-recorder
+id: adr-recorder
 description: >-
   Records significant decisions as immutable ADRs in .specs/decisions/. Use for
   mid-implementation decisions, challenger resolutions that need a durable

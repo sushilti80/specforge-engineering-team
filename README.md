@@ -1,6 +1,6 @@
 # SpecForge Engineering Team
 
-**SpecForge** is an installable spec-driven engineering team for **Cursor**, **Claude Code**, **Codex CLI**, and **OpenCode**: 20 agents, 23 skills, 5 checkpoint hooks (Cursor), **token discipline**, **release benchmarking**, project memory, and a bootstrap template.
+**SpecForge** is an installable spec-driven engineering team for **Cursor**, **Claude Code**, **Codex CLI**, **GitHub Copilot**, **ForgeCode**, and **OpenCode**: 20 agents, 23 skills, 5 checkpoint hooks (Cursor + Claude + Codex + Copilot), **token discipline**, **release benchmarking**, project memory, and a bootstrap template.
 
 > Specs are source of truth. Chat is ephemeral. Memory learns on disk. Tokens are measured, not guessed.
 
@@ -14,7 +14,7 @@ cd specforge-engineering-team
 bash scripts/install-all.sh
 ```
 
-`install-all.sh` syncs **Ponytail** skills from upstream, then installs Cursor, Claude, Codex, and OpenCode.
+`install-all.sh` syncs **Ponytail** skills from upstream, then installs Cursor, Claude, Codex, Copilot, ForgeCode, and OpenCode.
 
 ### Option B — Cursor only
 
@@ -31,13 +31,15 @@ Restart Cursor → **Settings → Plugins** → enable **specforge-engineering-t
 bash scripts/install-claude.sh
 ```
 
+Agents/skills → `~/.claude/`; checkpoint hooks → `~/.claude/settings.json`.
+
 ### Option D — Codex CLI
 
 ```bash
 bash scripts/install-codex.sh
 ```
 
-Skills install to `~/.agents/skills/`; docs to `~/.codex/specforge/`.
+Skills install to `~/.agents/skills/`; docs to `~/.codex/specforge/`; hooks to `~/.codex/hooks.json` (trust via `/hooks`).
 
 ### Option E — OpenCode
 
@@ -47,9 +49,35 @@ bash scripts/install-opencode.sh
 
 Agents, skills, and commands install to `~/.config/opencode/`.
 
+### Option F — GitHub Copilot (CLI)
+
+```bash
+bash scripts/install-copilot.sh
+```
+
+Agents → `~/.copilot/agents/*.agent.md`; skills → `~/.agents/skills/`; docs → `~/.copilot/specforge/`; hooks → `~/.copilot/hooks/specforge.json`.
+
+**Copilot Cloud Agent** cannot read `$HOME`. For cloud runs, vendor into the repo instead:
+
+```bash
+bash scripts/bootstrap-project.sh --platform copilot /path/to/project
+```
+
+This copies agents into `.github/agents/`, skills into `.github/skills/`, and generates `.github/hooks/specforge.json` with **relative paths** to a vendored `scripts/specforge-hooks/` (bridge + core scripts). Commit those directories so the cloud runner can execute hooks.
+
+### Option G — ForgeCode
+
+```bash
+bash scripts/install-forge.sh
+```
+
+Agents → `~/.forge/agents/*.md` (SpecForge agents carry both `name:` for Cursor/Claude and `id:` for ForgeCode — ForgeCode requires `id`); skills → `~/.agents/skills/` (ForgeCode has no native skills path; loaded on demand); docs → `~/.forge/specforge/`; global `~/.forge/AGENTS.md` (auto-loaded at every conversation start). **No hooks** — ForgeCode's user-configurable hooks PR was closed without merging; gate checkpoints are a manual checklist until upstream ships hooks.
+
+Invoke with `:agent eng-orchestrator` + the need/tier block.
+
 See [`docs/MULTI-TOOL.md`](docs/MULTI-TOOL.md) for parity details and per-tool quickstarts.
 
-### Option F — SpecForge CLI from GitHub Releases
+### Option H — SpecForge CLI from GitHub Releases
 
 Tagged releases publish a content tarball and the CLI script (plus checksums and cosign signatures):
 
@@ -108,6 +136,9 @@ Releases are cut by pushing a `v*` tag (see `.github/workflows/release.yml`) —
 | **Claude Code** | `~/.claude/agents/*.md` (symlinks) |
 | **OpenCode** | `~/.config/opencode/agents/*.md` (symlinks) |
 | **Codex CLI** | No agent files — skills in `~/.agents/skills/`, instructions in `~/.codex/AGENTS.md` |
+| **Copilot CLI** | `~/.copilot/agents/*.agent.md` (symlinks) + `~/.copilot/hooks/specforge.json` |
+| **Copilot Cloud** | repo-local `.github/agents/*.agent.md` + `.github/hooks/specforge.json` (vendored `scripts/specforge-hooks/`) |
+| **ForgeCode** | `~/.forge/agents/*.md` (symlinks; agents carry `id:` + `name:`) |
 
 Quick check:
 
@@ -172,7 +203,7 @@ The orchestrator picks the next agents (requirements-analyst → challenger → 
 | `/backend-engineer` | Only implement (needs APPROVED REQ+ARCH) |
 | `/verifier` | Only verify vs REQ |
 
-**Codex / Claude:** same tier/recipe block in chat; act as eng-orchestrator (see project `AGENTS.md`). Claude: agents appear by name under `~/.claude/agents/`.
+**Codex / Claude / Copilot / ForgeCode:** same tier/recipe block in chat; act as eng-orchestrator (see project `AGENTS.md`). Claude: agents appear by name under `~/.claude/agents/`. Copilot: `@eng-orchestrator` with the need/tier block (CLI agents under `~/.copilot/agents/`, Cloud under `.github/agents/`). ForgeCode: `:agent eng-orchestrator` with the need/tier block (agents under `~/.forge/agents/`).
 
 ### If `/` shows agents but nothing useful happens
 
@@ -205,7 +236,7 @@ Stop **review chats from turning into implement sessions** and cap **output bloa
 | Mechanism | What happens |
 |-----------|----------------|
 | **`rules/token-discipline.mdc`** | Always-on: verdict-first replies, advisory = readonly, paths over chat replay |
-| **`beforeSubmitPrompt` hook** (Cursor) | Detects review / docs / vendor-sync prompts → injects budget + mode |
+| **`beforeSubmitPrompt` hook** (Cursor / Claude / Codex / Copilot) | Detects review / docs / vendor-sync prompts → injects budget + mode |
 | **`spec-advisory`** | Readonly reviews — no file edits unless you say *implement* |
 | **`spec-token-budget`** | Output caps by profile (advisory ≤800w, handoff ≤500w, docs-touch, release) |
 | **Meta recipes** | Split sessions like Principle 8 — advisory ≠ build |
@@ -232,14 +263,16 @@ Read: .specs/decisions/DEC-001.md
 Do not use prior chat summaries.
 ```
 
-### Hooks & hygiene (Cursor)
+### Hooks & hygiene (Cursor / Claude / Codex / Copilot)
 
 | Hook | Token role |
 |------|------------|
-| `beforeSubmitPrompt` | Route advisory / docs / vendor intent |
-| `subagentStop` | Checkpoint + compress HANDOFF + `session.jsonl` metrics |
-| `sessionStart` | Principle 8 + journal tail (≤8 lines) |
-| `stop` | Nudge `distill-learning-journal.sh` |
+| `beforeSubmitPrompt` / `UserPromptSubmit` / `userPromptSubmitted` | Route advisory / docs / vendor intent |
+| `subagentStop` / `SubagentStop` | Checkpoint + compress HANDOFF + `session.jsonl` metrics |
+| `sessionStart` / `SessionStart` | Principle 8 + journal tail (≤8 lines) |
+| `stop` / `Stop` / `agentStop` | Nudge `distill-learning-journal.sh` |
+
+Claude: `install-claude.sh` merges into `~/.claude/settings.json`. Codex: `install-codex.sh` writes `~/.codex/hooks.json` — run `/hooks` once to **trust**. Copilot CLI: `install-copilot.sh` writes `~/.copilot/hooks/specforge.json`. Copilot Cloud: `bootstrap-project.sh --platform copilot` vendors `.github/hooks/specforge.json` + `scripts/specforge-hooks/` (commit both). OpenCode: manual gate checklist until plugin hooks land.
 
 **Weekly:** `bash scripts/distill-learning-journal.sh` — shrinks sessionStart input over time.
 
@@ -331,25 +364,25 @@ Agents learn across conversations via **project-scoped** memory (commit to git):
 
 Bootstrap creates stubs: `bash scripts/bootstrap-agent-memory.sh` (also run by `bootstrap-project.sh`).
 
-## Self-learning (Cursor hooks)
+## Self-learning (Cursor / Claude / Codex / Copilot hooks)
 
-When the Cursor plugin is enabled on a bootstrapped project:
+When SpecForge is installed and the project is bootstrapped (`.specs/` + `.agents/memory/`):
 
-1. **`sessionStart`** → Principle 8 + token discipline + **project memory summary** + recent journal
-2. **`beforeSubmitPrompt`** → advisory / docs / vendor intent routing
-3. **`subagentStop`** → gate checkpoint + HANDOFF compression + `session.jsonl` metrics
-4. **`afterFileEdit`** → logs `.specs/` and memory edits to `learning-journal.md`
-5. **`stop`** → nudges journal distillation + fresh chat for next gate
+1. **`sessionStart` / `SessionStart`** → Principle 8 + token discipline + **project memory summary** + recent journal
+2. **`beforeSubmitPrompt` / `UserPromptSubmit` / `userPromptSubmitted`** → advisory / docs / vendor intent routing
+3. **`subagentStop` / `SubagentStop`** → gate checkpoint + HANDOFF compression + `session.jsonl` metrics
+4. **`afterFileEdit` / `PostToolUse` / `postToolUse`** → logs `.specs/` and memory edits to `learning-journal.md`
+5. **`stop` / `Stop` / `agentStop`** → nudges journal distillation + fresh chat for next gate
 
-Other tools: follow the manual checkpoint checklist in `docs/MULTI-TOOL.md`; use skills `spec-advisory` and `spec-token-budget` explicitly.
+Cursor uses the plugin `hooks/`; Claude, Codex, and Copilot use `hooks/adapters/bridge.py` (`--platform claude|codex|copilot`). Copilot Cloud uses the vendored `scripts/specforge-hooks/bridge.py` with relative paths. OpenCode: follow the manual checkpoint checklist in `docs/MULTI-TOOL.md`; use skills `spec-advisory` and `spec-token-budget` explicitly.
 
 ## Roadmap & community
 
-**Supported today:** Cursor, Claude Code, Codex CLI, OpenCode.
+**Supported today:** Cursor, Claude Code, Codex CLI, GitHub Copilot (CLI + Cloud), ForgeCode, OpenCode.
 
-**Next up:** **GitHub Copilot** (Phase 2 — `install-copilot.sh`, `.github/agents/`, `.github/skills/`).
+**Next up:** **OpenCode hooks** and **ForgeCode hooks** (plugin lifecycle / upstream user-hooks adapters for the same 5 checkpoint events).
 
-**Help wanted (after Copilot):** ForgeCode, Aider, Windsurf, Cline, Kiro, and others. See [`docs/ROADMAP.md`](docs/ROADMAP.md) for contribution guidelines.
+**Help wanted:** Aider, Windsurf, Cline, Kiro, and others. See [`docs/ROADMAP.md`](docs/ROADMAP.md) for contribution guidelines.
 
 If you maintain or use another open-source coding agent, PRs for `scripts/install-<tool>.sh` are welcome.
 
@@ -365,19 +398,27 @@ specforge-engineering-team/
 │   └── ponytail*           # 6 ponytail skills (synced from upstream)
 ├── rules/                  # spec-driven, agent-memory, ponytail, token-discipline
 ├── commands/
-├── hooks/                  # 5 events (incl. beforeSubmitPrompt)
+├── hooks/                  # Cursor hooks + Claude/Codex/Copilot adapters (bridge.py)
+│   ├── adapters/bridge.py
+│   ├── claude/             # Claude hooks fragment
+│   ├── codex/              # Codex hooks template
+│   ├── copilot/            # Copilot hooks template (specforge.json)
+│   └── scripts/            # core checkpoint scripts (shared by all platforms)
 ├── docs/
 │   ├── ENGINEERING-METRICS.md   # release benchmarking framework
 │   └── ROADMAP.md
 ├── vendor/ponytail/
 ├── templates/
+│   └── platform/AGENTS.copilot.md
 └── scripts/
-    ├── install*.sh
+    ├── install*.sh              # install, install-claude, install-codex, install-copilot, install-opencode, install-all
+    ├── test-hooks-adapters.sh   # Claude/Codex hook bridge smoke
+    ├── test-copilot-adapter.sh  # Copilot install+bootstrap+bridge fixtures
     ├── sync-ponytail.sh
     ├── estimate-pipeline-tokens.sh    # Tier C heuristics
     ├── collect-release-metrics.sh     # Tier B proxies
     ├── distill-learning-journal.sh    # shrink sessionStart input
-    └── bootstrap-project.sh
+    └── bootstrap-project.sh           # --platform copilot vendors .github/ + scripts/specforge-hooks/
 ```
 
 ## Acknowledgments
@@ -402,8 +443,8 @@ context-mode is a **separate install** (Cursor marketplace or MCP plugin), not b
 
 | Project | Contribution |
 |---------|----------------|
-| [**AGENTS.md**](https://agents.md/) | Cross-tool project instructions — entry point for Cursor, Codex, Claude, and OpenCode |
-| **Agent skills & plugins ecosystem** | Cursor, Claude Code, OpenCode, and Codex CLI — the harness model we install into |
+| [**AGENTS.md**](https://agents.md/) | Cross-tool project instructions — entry point for Cursor, Codex, Claude, Copilot, ForgeCode, and OpenCode |
+| **Agent skills & plugins ecosystem** | Cursor, Claude Code, OpenCode, Codex CLI, GitHub Copilot, and ForgeCode — the harness model we install into |
 
 If we missed a project your work drew from, open an issue or PR — we are happy to credit it here.
 

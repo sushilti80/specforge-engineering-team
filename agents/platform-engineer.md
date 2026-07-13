@@ -1,5 +1,6 @@
 ---
 name: platform-engineer
+id: platform-engineer
 description: >-
   IaC and platform implementer (Terraform/Terragrunt/Bicep/K8s/Helm). Use when
   ARCH/ADR allows infra work. Owns modules and platform resources; leaves CI/CD

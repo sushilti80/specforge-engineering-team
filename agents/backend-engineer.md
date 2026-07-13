@@ -1,5 +1,6 @@
 ---
 name: backend-engineer
+id: backend-engineer
 description: >-
   Backend implementer for API/server/data-access work. Use after orchestrator
   gate allows implementers (REQ APPROVED; ARCH when required). Reads .specs/

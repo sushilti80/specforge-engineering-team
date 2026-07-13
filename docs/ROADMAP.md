@@ -1,12 +1,14 @@
 # SpecForge roadmap
 
-Last updated: 2026-07-11
+Last updated: 2026-07-13
 
 ## Current release
 
 | Tag | Notes |
 |-----|--------|
-| **[v2.0.1](RELEASE-v2.0.1.md)** | Anti-leak: spawn allowlist, path-only HANDOFF, disk-wins-over-chat |
+| **[v2.1.0](RELEASE-v2.1.0.md)** | Claude/Codex global hooks; Copilot adapter (CLI + Cloud); ForgeCode adapter; `id:` agent frontmatter |
+| [v2.0.2](RELEASE-v2.0.2.md) | Release signing + cosign verify path |
+| [v2.0.1](RELEASE-v2.0.1.md) | Anti-leak: spawn allowlist, path-only HANDOFF, disk-wins-over-chat |
 | [v2.0.0](RELEASE-v2.0.0.md) | Need-based control plane (breaking): recipes §0, human APPROVED, ≤2-round anti-loops |
 | [v1.1.0](https://github.com/sushilti80/specforge-engineering-team/releases/tag/v1.1.0) | Prior line — upgrade via install scripts |
 
@@ -21,8 +23,11 @@ Last updated: 2026-07-11
 | Platform | Install | Agents | Skills | Hooks | Ponytail |
 |----------|---------|--------|--------|-------|----------|
 | **Cursor** | `scripts/install.sh` | 20 (plugin) | 19 | 5 | rule + skills |
-| **Claude Code** | `scripts/install-claude.sh` | 20 | 19 | — | skills |
-| **Codex CLI** | `scripts/install-codex.sh` | via AGENTS.md | 19 | — | skills |
+| **Claude Code** | `scripts/install-claude.sh` | 20 | 19 | 5 (global) | skills |
+| **Codex CLI** | `scripts/install-codex.sh` | via AGENTS.md | 19 | 5 (global) | skills |
+| **Copilot CLI** | `scripts/install-copilot.sh` | 20 (`*.agent.md`) | 19 | 5 (global) | skills |
+| **Copilot Cloud** | `bootstrap-project.sh --platform copilot` | 20 (`.github/agents`) | 19 (`.github/skills`) | 5 (`.github/hooks`, vendored) | skills |
+| **ForgeCode** | `scripts/install-forge.sh` | 20 (symlink, `id:`+`name:`) | 19 (`~/.agents/skills`) | — (PR #2757 closed) | skills |
 | **OpenCode** | `scripts/install-opencode.sh` | 20 | 19 | — | skills |
 
 Bootstrap: `scripts/bootstrap-project.sh` · guide: `BOOTSTRAP-SPEC-DRIVEN-PROJECT.md` · parity: `MULTI-TOOL.md`.
@@ -70,29 +75,14 @@ Prioritize **adoption and honesty of the control plane** before new platforms.
 
 ---
 
-## Next platform — GitHub Copilot (Phase 2)
+## Next platform adapters — community wanted
 
-After near-term v2 hardening. Maintainer target; community PRs welcome.
-
-| Deliverable | Target |
-|-------------|--------|
-| `scripts/install-copilot.sh` | Agents/skills/docs → Copilot discovery paths |
-| Bootstrap | `--platform copilot` → project `.github/…` as needed |
-| Entry | Project `AGENTS.md` + Copilot custom agents (need-first, v2 doctrine) |
-| Parity | 20 agents where possible; hooks manual (same as Claude/Codex) |
-
-Track: issue `[platform] GitHub Copilot install adapter` · labels `platform`, `copilot`, `next-up`.
-
----
-
-## Community wanted — additional AI tools
-
-One harness (agents, skills, docs); each tool gets a thin adapter. Copilot is next on the maintainer list; other tools welcome in parallel.
+Copilot (CLI + Cloud) and ForgeCode (agents) are now shipped. One harness (agents, skills, docs); each tool gets a thin adapter. OpenCode hooks and ForgeCode hooks are the next maintainer targets; other tools welcome in parallel.
 
 | Priority | Tool | Likely install path | Notes | Status |
 |----------|------|---------------------|-------|--------|
-| **Next** | **GitHub Copilot** | `.github/agents/`, `.github/skills/` | Phase 2 | **Next up** |
-| 2 | **ForgeCode** | `~/.forge/…`, `AGENTS.md` | Different agent YAML | Help wanted |
+| **Next** | **OpenCode hooks** | plugin lifecycle API | Same 5 checkpoint events via bridge | **Help wanted** |
+| 2 | **ForgeCode hooks** | `~/.forge/` hooks config | PR #2757 closed 2026-04-28; revisit when upstream ships user hooks (contract mirrors Claude Code) | **Blocked upstream** |
 | 3 | **Aider** | `.aider.conf.yml`, `AGENTS.md` | No native subagents | Help wanted |
 | 4 | **Windsurf** | `.windsurf/rules/` | Ponytail upstream rules | Help wanted |
 | 5 | **Cline** | `.clinerules/` | Instruction-only | Help wanted |
@@ -109,7 +99,7 @@ One harness (agents, skills, docs); each tool gets a thin adapter. Copilot is ne
 
 ### Out of scope for adapters
 
-- Reimplementing Cursor hooks (document manual checkpoint checklist)
+- Reimplementing Cursor hook *scripts* (reuse `hooks/scripts/` + platform bridge)
 - Forcing all 20 agents if the tool only supports AGENTS.md + skills (document reduced mode)
 - Vendor-specific model routing
 
@@ -126,9 +116,9 @@ One harness (agents, skills, docs); each tool gets a thin adapter. Copilot is ne
 
 | Priority | Item | Description |
 |----------|------|-------------|
-| 1 | **`install-copilot.sh`** | After near-term pilots |
-| 2 | Release metrics dashboard | Optional viz over `.specs/metrics/releases/` |
-| 3 | Hook parity | Codex / OpenCode lifecycle hooks ≈ Cursor gate semantics |
+| 1 | Release metrics dashboard | Optional viz over `.specs/metrics/releases/` |
+| 2 | OpenCode hook parity | Plugin lifecycle ≈ Cursor/Claude/Codex/Copilot gate semantics |
+| 3 | ForgeCode hook parity | Revisit when ForgeCode merges user-configurable hooks upstream (PR #2757 closed) |
 | 4 | Billing CSV ingest | Auto-fill Tier A token totals in release YAML |
 | 5 | Ponytail auto-sync | CI: `vendor/ponytail/VERSION` matches upstream tag |
 | 6 | Harder APPROVED lock | Optional file/schema check so agents cannot silently flip status |

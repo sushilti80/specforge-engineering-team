@@ -1,5 +1,6 @@
 ---
 name: code-reviewer
+id: code-reviewer
 description: >-
   Readonly code review against APPROVED specs and contracts. Findings only —
   does not merge-approve. Critical blocks Gate 3; max 2 review rounds then human

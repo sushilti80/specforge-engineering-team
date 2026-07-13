@@ -6,10 +6,13 @@ SpecForge ships one harness (agents, skills, docs) and installs it into each AI 
 
 | Platform | Command | What gets linked |
 |----------|---------|------------------|
-| **All** | `bash scripts/install-all.sh` | Cursor + Claude + Codex + OpenCode |
+| **All** | `bash scripts/install-all.sh` | Cursor + Claude + Codex + Copilot + OpenCode |
 | **Cursor** | `bash scripts/install.sh` | Plugin + docs in `~/.cursor/` |
 | **Claude Code** | `bash scripts/install-claude.sh` | `~/.claude/agents/`, `~/.claude/skills/`, docs |
 | **Codex CLI** | `bash scripts/install-codex.sh` | `~/.agents/skills/`, `~/.codex/specforge/`, global `~/.codex/AGENTS.md` |
+| **Copilot CLI** | `bash scripts/install-copilot.sh` | `~/.copilot/agents/*.agent.md`, `~/.agents/skills/`, `~/.copilot/specforge/`, `~/.copilot/hooks/specforge.json` |
+| **Copilot Cloud** | `bash scripts/bootstrap-project.sh --platform copilot` | `.github/agents/`, `.github/skills/`, `.github/hooks/`, `scripts/specforge-hooks/` (vendored, repo-local) |
+| **ForgeCode** | `bash scripts/install-forge.sh` | `~/.forge/agents/*.md`, `~/.agents/skills/`, `~/.forge/specforge/`, global `~/.forge/AGENTS.md` |
 | **OpenCode** | `bash scripts/install-opencode.sh` | `~/.config/opencode/{agents,skills,commands,specforge}/` |
 
 Bootstrap a project:
@@ -30,19 +33,21 @@ Agents and skills reference **`SPECFORGE_HOME`** for playbook and recipes. Resol
 | Codex | `~/.codex/specforge/` |
 | OpenCode | `~/.config/opencode/specforge/` |
 | Claude Code | `~/.claude/docs/specforge/` |
+| Copilot | `~/.copilot/specforge/` (CLI) or `.github/` (Cloud Agent) |
+| ForgeCode | `~/.forge/specforge/` (CLI) or `.forge/` (project-local) |
 
 ## Parity matrix
 
-| Capability | Cursor | Claude | OpenCode | Codex | Copilot (**next**) |
-|------------|--------|--------|----------|-------|-------------------|
-| 20 agents | plugin | symlink | symlink | via AGENTS.md + skills | `.github/agents` |
-| 15 skills (9 spec + 6 ponytail) | plugin | symlink | symlink | `~/.agents/skills` | `.github/skills` |
-| Ponytail minimal-code rule | `rules/ponytail.mdc` | skill only | skill only | skill only | TBD |
-| Slash / entry | `/eng-orchestrator` (pref); `/spec-pipeline` cheat sheet | prompt in AGENTS.md | `@eng-orchestrator` (pref); `/spec-pipeline` cheat sheet | need/tier prompt in AGENTS.md | invoke eng-orchestrator |
-| Hooks / automation | 4 hooks | none | plugins TBD | `.codex` hooks TBD | none |
-| Project memory | `.agents/memory/` | same | same | same | same |
-| Spec gates | rules + AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md |
-| Project entry | AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md |
+| Capability | Cursor | Claude | OpenCode | Codex | Copilot | ForgeCode |
+|------------|--------|--------|----------|-------|---------|-----------|
+| 20 agents | plugin | symlink | symlink | via AGENTS.md + skills | `.github/agents` (cloud) / `~/.copilot/agents` (CLI) | `~/forge/agents` (symlink, `id:`+`name:`) |
+| 15 skills (9 spec + 6 ponytail) | plugin | symlink | symlink | `~/.agents/skills` | `.github/skills` (cloud) / `~/.agents/skills` (CLI) | `~/.agents/skills` (load on demand) |
+| Ponytail minimal-code rule | `rules/ponytail.mdc` | skill only | skill only | skill only | skill only | skill only |
+| Slash / entry | `/eng-orchestrator` (pref); `/spec-pipeline` cheat sheet | prompt in AGENTS.md | `@eng-orchestrator` (pref); `/spec-pipeline` cheat sheet | need/tier prompt in AGENTS.md | `@eng-orchestrator` with need/tier | `:agent eng-orchestrator` with need/tier |
+| Hooks / automation | 5 (plugin) | 5 (global settings) | plugins TBD | 5 (`~/.codex/hooks.json`) | 5 (`~/.copilot/hooks/specforge.json` CLI; `.github/hooks/specforge.json` cloud) | none (PR #2757 closed; manual checklist) |
+| Project memory | `.agents/memory/` | same | same | same | same | same |
+| Spec gates | rules + AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md + `.github/copilot-instructions.md` | AGENTS.md (manual checklist) |
+| Project entry | AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md | AGENTS.md (auto-loaded, walks git root→CWD) |
 
 ## Ponytail (all supported platforms)
 
@@ -96,6 +101,19 @@ Act as **eng-orchestrator** — need checklist → matrix → HANDOFF with agent
 
 Invoke agents by name (e.g. `eng-orchestrator`) or paste the same tier/recipe template. Skills load from `~/.claude/skills/`.
 
+### Copilot
+
+Two install modes:
+
+- **Copilot CLI** — `bash scripts/install-copilot.sh` links agents (`~/.copilot/agents/*.agent.md`), skills, docs, and registers 5 hooks in `~/.copilot/hooks/specforge.json`. Invoke `@eng-orchestrator` with the need/tier block.
+- **Copilot Cloud Agent** — `bash scripts/bootstrap-project.sh --platform copilot /path/to/project` vendors everything into `.github/` (agents, skills, hooks) and `scripts/specforge-hooks/` (bridge + core scripts) with **relative paths**. Commit these so the cloud runner can execute hooks without `$HOME` access.
+
+### ForgeCode
+
+`bash scripts/install-forge.sh` symlinks agents into `~/.forge/agents/*.md` (SpecForge agents carry both `name:` for Cursor/Claude and `id:` for ForgeCode — ForgeCode requires `id` and does not fall back to `name`). Skills live in the cross-tool `~/.agents/skills/` (ForgeCode has no native skills path; load on demand via AGENTS.md). ForgeCode auto-loads `~/.forge/AGENTS.md` at every conversation start.
+
+Switch agents with `:agent eng-orchestrator` (or `:agent` picker), then paste the need/tier block. **No hooks** — ForgeCode's user-configurable hooks PR (#2757) was closed without merging, so gate checkpoints are a manual checklist (same parity tier as OpenCode).
+
 ## Project layout (all tools)
 
 ```
@@ -113,9 +131,11 @@ your-app/
     └── commands/
 ```
 
-## Gate checkpoint (manual — Codex / OpenCode / Claude)
+## Gate checkpoint (Claude / Codex / Copilot / ForgeCode / OpenCode)
 
-Cursor hooks automate this; other tools follow the same checklist manually at each gate:
+**Claude, Codex, and Copilot:** SpecForge install registers the same 5 checkpoint hooks via `hooks/adapters/bridge.py`. Codex requires a one-time `/hooks` trust after install. Copilot CLI writes `~/.copilot/hooks/specforge.json`; Copilot Cloud uses repo-local `.github/hooks/specforge.json` with vendored `scripts/specforge-hooks/`.
+
+**ForgeCode and OpenCode (no user-configurable hooks):** follow this checklist manually at each gate:
 
 1. Update `.specs/` files if changed
 2. Update `.agents/memory/_project/specs-index.md`
@@ -134,26 +154,26 @@ ln -sfn ../.agents/memory .cursor/agent-memory
 
 Commit `.agents/memory/` and `AGENTS.md`.
 
-## Next up — GitHub Copilot
+## Next up — OpenCode hooks + ForgeCode hooks
 
-**First platform on the roadmap after the four supported tools.** See [`ROADMAP.md`](ROADMAP.md#next-up--github-copilot-phase-2).
+Copilot (CLI + Cloud) and ForgeCode (agents) are now shipped. The next adapter work:
 
-Planned deliverables:
+- **OpenCode hooks** — evaluate plugin lifecycle API for the same 5 checkpoint events.
+- **ForgeCode hooks** — revisit when ForgeCode merges a user-configurable hook system upstream (PR #2757 was closed 2026-04-28; the contract mirrors Claude Code, so a `bridge.py --platform forge` alias will be straightforward once it lands).
+- **More platforms** — Aider, Windsurf, Cline, Kiro (see [`ROADMAP.md`](ROADMAP.md)).
 
-- `scripts/install-copilot.sh` → `~/.github/agents/`, `~/.github/skills/`
-- Bootstrap `--platform copilot` → project `.github/agents/`, `.github/skills/`
-- Project `AGENTS.md` as entry; manual gate checkpoints (like Claude/Codex)
+Community: PRs and issue `[platform] <tool> install adapter` welcome.
 
-Community: PRs and issue `[platform] GitHub Copilot install adapter` welcome.
+## Hook parity
 
-## Community — other platforms (after Copilot)
+| Platform | Status |
+|----------|--------|
+| **Cursor** | 5 hooks via plugin `hooks/hooks.json` |
+| **Claude Code** | 5 hooks via `install-claude.sh` → `~/.claude/settings.json` + `hooks/adapters/bridge.py` |
+| **Codex CLI** | 5 hooks via `install-codex.sh` → `~/.codex/hooks.json` + bridge (trust with `/hooks`) |
+| **Copilot CLI** | 5 hooks via `install-copilot.sh` → `~/.copilot/hooks/specforge.json` + bridge (`--platform copilot`) |
+| **Copilot Cloud** | 5 hooks via `bootstrap-project.sh --platform copilot` → `.github/hooks/specforge.json` (vendored `scripts/specforge-hooks/`) |
+| **ForgeCode** | none — user-configurable hooks PR #2757 closed without merging; manual gate checklist (revisit when upstream ships hooks) |
+| **OpenCode** | evaluate plugin lifecycle API — manual checklist until then |
 
-**ForgeCode, Aider, Windsurf, Cline, Kiro**, and others are **not shipped yet**. We welcome PRs for `scripts/install-<tool>.sh` and bootstrap overlays once Copilot lands or in parallel if unblocked.
-
-Contribution checklist: [`ROADMAP.md`](ROADMAP.md)
-
-## Hook parity (planned)
-
-- Codex: checkpoint hooks in `.codex/hooks/`
-- OpenCode: evaluate plugin lifecycle API
-- Same semantics as Cursor [`hooks/scripts/`](../hooks/scripts/)
+Same core scripts: [`hooks/scripts/`](../hooks/scripts/).
