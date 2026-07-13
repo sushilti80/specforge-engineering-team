@@ -1,8 +1,8 @@
 {
   "name": "specforge-engineering-team",
   "displayName": "SpecForge Engineering Team",
-  "version": "2.1.1",
-  "description": "SpecForge — need-based spec-driven engineering team for Cursor, Claude, Codex, Copilot, ForgeCode, and OpenCode: 20 agents, skills, hooks (Cursor/Claude/Codex/Copilot), minimal-first recipes, human APPROVED gates, release metrics, and bootstrap template.",
+  "version": "2.1.2",
+  "description": "SpecForge \u2014 need-based spec-driven engineering team for Cursor, Claude, Codex, Copilot, ForgeCode, and OpenCode: 20 agents, skills, hooks (Cursor/Claude/Codex/Copilot), minimal-first recipes, human APPROVED gates, release metrics, and bootstrap template.",
   "author": {
     "name": "SpecForge"
   },

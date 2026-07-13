@@ -7,16 +7,44 @@
 # Usage:
 #   bash scripts/estimate-pipeline-tokens.sh <recipe> --tier N --mode minimal
 #   bash scripts/estimate-pipeline-tokens.sh <recipe> --tier N --agents eng-orchestrator,requirements-analyst,backend-engineer,test-runner,verifier
+#   bash scripts/estimate-pipeline-tokens.sh --help
 set -euo pipefail
 
-RECIPE="${1:-}"
+usage() {
+  cat <<'EOF'
+Usage: bash scripts/estimate-pipeline-tokens.sh <recipe> [options]
+
+Options:
+  --tier 0|1|2|3     Tier (default: 1)
+  --mode minimal|ceiling
+                     Agent list mode when --agents is omitted (default: minimal)
+  --agents a,b,c     Exact planned agents (preferred — from agents_planned)
+  --project DIR      cd into DIR before estimating (default: .)
+  -h, --help         Show this help
+
+Recipes:
+  hotfix bug-fix maintenance greenfield-feature|capability|feature-change
+  new-application spec-only infra-change security-patch
+  advisory-only docs-touch vendor-sync
+
+Notes:
+  Prefer --agents for cross-harness accuracy. minimal/ceiling tables are heuristics
+  and may drift from ENGINEERING-RECIPES.md §0 — treat --agents as SoT for planning.
+EOF
+}
+
+RECIPE=""
 TIER=1
 MODE="minimal"
 AGENTS_OVERRIDE=""
+PROJECT="."
 
-shift || true
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
     --tier)
       TIER="$2"
       shift 2
@@ -29,18 +57,34 @@ while [[ $# -gt 0 ]]; do
       AGENTS_OVERRIDE="$2"
       shift 2
       ;;
-    *)
+    --project)
+      PROJECT="$2"
+      shift 2
+      ;;
+    -*)
       echo "Unknown option: $1" >&2
+      usage >&2
       exit 1
+      ;;
+    *)
+      if [[ -z "$RECIPE" ]]; then
+        RECIPE="$1"
+        shift
+      else
+        echo "Unexpected argument: $1" >&2
+        usage >&2
+        exit 1
+      fi
       ;;
   esac
 done
 
 if [[ -z "$RECIPE" ]]; then
-  echo "Usage: bash scripts/estimate-pipeline-tokens.sh <recipe> [--tier 0|1|2|3] [--mode minimal|ceiling] [--agents a,b,c]" >&2
-  echo "Recipes: hotfix bug-fix maintenance greenfield-feature|capability new-application spec-only infra-change security-patch advisory-only docs-touch vendor-sync" >&2
+  usage >&2
   exit 1
 fi
+
+cd "$PROJECT"
 
 # Normalize alias
 if [[ "$RECIPE" == "capability" || "$RECIPE" == "feature-change" ]]; then
@@ -51,7 +95,11 @@ python3 - "$RECIPE" "$TIER" "$MODE" "$AGENTS_OVERRIDE" <<'PY'
 import sys
 
 recipe, tier_s, mode, override = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-tier = int(tier_s)
+try:
+    tier = int(tier_s)
+except ValueError:
+    print(f"Invalid --tier: {tier_s} (use 0|1|2|3)", file=sys.stderr)
+    sys.exit(1)
 
 AGENTS = {
     "requirements-analyst": (8000, 3000),
@@ -67,7 +115,7 @@ AGENTS = {
     "test-runner": (10000, 2000),
     "code-reviewer": (8000, 2000),
     "security-reviewer": (10000, 2000),
-    "ponytail-review": (6000, 1000),
+    "ponytail-review": (6000, 1000),  # skill cost proxy when Gate 3 includes it
     "verifier": (10000, 3000),
     "spec-guardian": (8000, 2000),
     "eng-orchestrator": (20000, 4000),
@@ -76,7 +124,8 @@ AGENTS = {
     "sre-devops": (10000, 3000),
 }
 
-# Minimal = matrix R (+ orchestrator). Ceiling = upper-bound historical full lists.
+# Minimal ≈ matrix R (+ orchestrator). Ceiling = upper-bound historical full lists.
+# May drift from ENGINEERING-RECIPES.md §0 — prefer --agents.
 MINIMAL = {
     "hotfix": {
         0: ["eng-orchestrator", "debugger"],
@@ -95,6 +144,7 @@ MINIMAL = {
         3: ["eng-orchestrator", "architect", "challenger", "backend-engineer", "test-runner", "code-reviewer", "security-reviewer", "verifier", "spec-guardian"],
     },
     "security-patch": {
+        # security-reviewer appears twice intentionally: pre-impl audit + post-impl re-check
         1: ["eng-orchestrator", "security-reviewer", "backend-engineer", "test-runner", "security-reviewer", "verifier"],
         2: ["eng-orchestrator", "security-reviewer", "backend-engineer", "test-runner", "security-reviewer", "verifier"],
         3: ["eng-orchestrator", "security-reviewer", "backend-engineer", "test-runner", "security-reviewer", "verifier", "spec-guardian"],
@@ -153,8 +203,12 @@ CEILING = {
     "vendor-sync": ["eng-orchestrator"],
 }
 
+tier_note = ""
+unknown_agents = []
+
 if override:
     agents = [a.strip() for a in override.split(",") if a.strip()]
+    unknown_agents = [a for a in agents if a not in AGENTS]
 elif mode == "ceiling":
     if recipe not in CEILING:
         print(f"Unknown recipe: {recipe}", file=sys.stderr)
@@ -165,15 +219,17 @@ elif mode == "minimal":
         print(f"Unknown recipe: {recipe}", file=sys.stderr)
         sys.exit(1)
     by_tier = MINIMAL[recipe]
-    # fall back to nearest defined tier
     if tier in by_tier:
         agents = by_tier[tier]
-    elif tier <= 1 and 1 in by_tier:
-        agents = by_tier[1]
-    elif 2 in by_tier:
-        agents = by_tier[2]
     else:
-        agents = by_tier[max(by_tier)]
+        # Nearest defined tier (prefer lower then higher)
+        defined = sorted(by_tier)
+        chosen = min(defined, key=lambda t: (abs(t - tier), t))
+        agents = by_tier[chosen]
+        tier_note = (
+            f"# WARN: tier {tier} not defined for recipe={recipe}; "
+            f"using nearest defined tier={chosen} (defined: {defined})"
+        )
 else:
     print(f"Unknown mode: {mode} (use minimal|ceiling)", file=sys.stderr)
     sys.exit(1)
@@ -188,8 +244,17 @@ for a in agents:
 
 total = ti + to
 print(f"# Token estimate (heuristic) — recipe={recipe} tier={tier} mode={mode}")
-print(f"# SoT for agent selection: ENGINEERING-RECIPES.md matrix + HANDOFF agents_planned.")
-print(f"# Prefer --agents for exact planned estimate. Confidence: medium (±30–50%).")
+print("# SoT for agent selection: ENGINEERING-RECIPES.md matrix + HANDOFF agents_planned.")
+print("# Prefer --agents for exact planned estimate. Confidence: medium (±30–50%).")
+if override:
+    print("# Source: --agents override (recommended for cross-harness accuracy)")
+if tier_note:
+    print(tier_note, file=sys.stderr)
+    print(tier_note)
+if unknown_agents:
+    warn = f"# WARN: unknown agent names (using default 10k/3k): {', '.join(unknown_agents)}"
+    print(warn, file=sys.stderr)
+    print(warn)
 print()
 print(f"estimated_input:  {ti:,}")
 print(f"estimated_output: {to:,}")
