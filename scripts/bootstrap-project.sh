@@ -260,6 +260,23 @@ for script in bootstrap-agent-memory.sh; do
     fi
   fi
 done
+
+# Project-runtime helpers referenced by hooks/playbook as scripts/<name> in the app repo.
+# Distill is nudged by session-stop; estimate/collect are used for release metrics.
+for script in distill-learning-journal.sh estimate-pipeline-tokens.sh collect-release-metrics.sh; do
+  if [[ -f "$PLUGIN_ROOT/scripts/$script" ]]; then
+    if [[ -f "$PROJECT_ROOT/scripts/$script" ]]; then
+      echo "  skip (exists): scripts/$script"
+    else
+      cp "$PLUGIN_ROOT/scripts/$script" "$PROJECT_ROOT/scripts/$script"
+      chmod +x "$PROJECT_ROOT/scripts/$script" 2>/dev/null || true
+      echo "  copied: scripts/$script"
+    fi
+  else
+    echo "  skip (missing in harness): scripts/$script" >&2
+  fi
+done
+
 if [[ -f "$PLUGIN_ROOT/scripts/bootstrap-project.sh" ]]; then
   cp "$PLUGIN_ROOT/scripts/bootstrap-project.sh" "$PROJECT_ROOT/scripts/bootstrap-project.sh"
   chmod +x "$PROJECT_ROOT/scripts/bootstrap-project.sh" 2>/dev/null || true
