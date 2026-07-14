@@ -114,8 +114,24 @@ def normalize_stdin(data: dict[str, Any]) -> dict[str, Any]:
         else:
             out["loop_count"] = 0
 
-    if "modified_files" not in out:
-        out["modified_files"] = []
+    if "modified_files" not in out or not out.get("modified_files"):
+        # Prefer explicit lists; also accept alternate key names from platforms.
+        candidates = []
+        for key in (
+            "modified_files",
+            "files_modified",
+            "changed_files",
+            "edited_files",
+            "file_changes",
+        ):
+            val = data.get(key)
+            if isinstance(val, list) and val:
+                candidates = val
+                break
+            if isinstance(val, str) and val.strip():
+                candidates = [val.strip()]
+                break
+        out["modified_files"] = candidates
 
     return out
 

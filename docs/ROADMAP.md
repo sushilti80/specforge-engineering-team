@@ -1,12 +1,13 @@
 # SpecForge roadmap
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Current release
 
 | Tag | Notes |
 |-----|--------|
-| **[v2.1.2](RELEASE-v2.1.2.md)** | Metrics script hardening: estimate/collect CLI, --since fail-loud, ledger ts filter, short-repo clamp |
+| **[v2.1.3](RELEASE-v2.1.3.md)** | Cursor files_modified fix: afterFileEdit → edits.jsonl claim on subagentStop |
+| [v2.1.2](RELEASE-v2.1.2.md) | Metrics script hardening: estimate/collect CLI, --since fail-loud, ledger ts filter, short-repo clamp |
 | [v2.1.1](RELEASE-v2.1.1.md) | Bootstrap copies distill/estimate/collect scripts into projects; code-reviewer untrusted-content defense |
 | [v2.1.0](RELEASE-v2.1.0.md) | Claude/Codex global hooks; Copilot adapter (CLI + Cloud); ForgeCode adapter; `id:` agent frontmatter |
 | [v2.0.2](RELEASE-v2.0.2.md) | Release signing + cosign verify path |

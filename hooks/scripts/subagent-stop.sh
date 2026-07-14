@@ -49,16 +49,19 @@ def main() -> None:
         print("{}")
         return
 
-    agent = data.get("subagent_type") or ""
+    agent = data.get("subagent_type") or data.get("agent_type") or ""
     if agent not in SPEC_AGENTS:
         print("{}")
         return
 
-    log_subagent_complete(data)
-
-    modified = data.get("modified_files") or []
+    # Ensure agent key is set for ledger helpers that only look at subagent_type.
+    data["subagent_type"] = agent
+    modified = log_subagent_complete(data)
     spec_touch = any(
-        ".specs/" in p or "agent-memory" in p or ".agents/memory/" in p for p in modified
+        ".specs/" in p.replace("\\", "/")
+        or "agent-memory" in p.replace("\\", "/")
+        or "/.agents/memory/" in p.replace("\\", "/")
+        for p in modified
     )
 
     msg = (

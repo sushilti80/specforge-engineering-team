@@ -166,8 +166,11 @@ Skip Tier A if no export.
 
 Path: `.agents/memory/_project/metrics/session.jsonl` (alias `.cursor/agent-memory/...`).
 
-Hook fields today: `ts`, `event`, `agent`, `files_modified`, `spec_touch`.  
+Hook fields today: `ts`, `event`, `agent`, `files_modified`, `files_source`, `spec_touch`, optional `files_sample`.  
+`files_source`: `hook` (Cursor/platform `modified_files`), `edits_buffer` (claimed from `afterFileEdit` → `edits.jsonl`), `transcript`, or `none`.  
 Optional if present on event: `recipe`, `tier`, `phase`, `round`.
+
+**Note:** Cursor often sends empty `modified_files` on `subagentStop`. SpecForge buffers every `afterFileEdit` into `edits.jsonl` and claims those paths when the subagent completes so `files_modified` is meaningful.
 
 **Planned agents, reclassifications, human decisions, rounds** — record in `eng-orchestrator/MEMORY.md` and/or REL YAML until hooks carry richer payloads.
 

@@ -2,7 +2,8 @@
 
 Auto-appended by Cursor hook `subagentStop` when spec-team subagents complete:
 
-- `session.jsonl` — one JSON line per subagent (`agent`, `files_modified`, `spec_touch`)
+- `session.jsonl` — one JSON line per subagent (`agent`, `files_modified`, `files_source`, `spec_touch`, optional `files_sample`)
+- `edits.jsonl` — buffered `afterFileEdit` paths claimed into `session.jsonl` when Cursor omits `modified_files`
 
 At release (Tier 2+):
 

@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
-"""Append to learning-journal when .specs/ or agent-memory files are edited."""
+"""Append to learning-journal when .specs/ or agent-memory files are edited.
+
+Also records *all* file edits into metrics/edits.jsonl so subagentStop can
+recover files_modified when Cursor sends an empty modified_files list.
+"""
 import json
 import os
 import sys
-from datetime import datetime, timezone
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
+
+from metrics_ledger import record_file_edit  # noqa: E402
 
 
 def resolve_journal_dir(cwd: str) -> str:
@@ -29,6 +38,10 @@ def main() -> None:
         print("{}")
         return
 
+    cwd = data.get("cwd") or os.getcwd()
+    # Always buffer edits for metrics (app code + specs).
+    record_file_edit(cwd, file_path, data)
+
     normalized = file_path.replace("\\", "/")
     is_spec = "/.specs/" in normalized or normalized.startswith(".specs/")
     is_memory = "agent-memory" in normalized or "/.agents/memory/" in normalized
@@ -36,9 +49,10 @@ def main() -> None:
         print("{}")
         return
 
-    cwd = data.get("cwd") or os.getcwd()
     journal_dir = resolve_journal_dir(cwd)
     journal = os.path.join(journal_dir, "learning-journal.md")
+
+    from datetime import datetime, timezone
 
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     kind = "spec" if is_spec else "memory"
@@ -47,7 +61,11 @@ def main() -> None:
     try:
         with open(journal, "a", encoding="utf-8") as f:
             if os.path.getsize(journal) == 0:
-                f.write("# Learning journal (append-only)\n\nAuto-logged by SpecForge plugin hooks.\nDistill durable facts into MEMORY.md; specs remain source of truth.\n\n")
+                f.write(
+                    "# Learning journal (append-only)\n\n"
+                    "Auto-logged by SpecForge plugin hooks.\n"
+                    "Distill durable facts into MEMORY.md; specs remain source of truth.\n\n"
+                )
             f.write(line)
     except OSError:
         pass
