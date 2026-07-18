@@ -27,15 +27,15 @@ link_agents() {
   local target_dir="$1"
   local plugin_root="${2:-$(specforge_resolve_root)}"
   mkdir -p "$target_dir"
-  local agent count=0
-  for agent in "$plugin_root/agents/"*.md; do
-    [[ -f "$agent" ]] || continue
-    local name
-    name="$(basename "$agent")"
-    ln -sfn "$agent" "$target_dir/$name"
-    echo "  agent: $name"
+  local agent rel dest count=0
+  while IFS= read -r -d '' agent; do
+    rel="${agent#"$plugin_root/agents/"}"
+    dest="$target_dir/$rel"
+    mkdir -p "$(dirname "$dest")"
+    ln -sfn "$agent" "$dest"
+    echo "  agent: $rel"
     count=$((count + 1))
-  done
+  done < <(find "$plugin_root/agents" -name '*.md' -type f -print0 2>/dev/null)
   echo "  linked $count agents -> $target_dir"
 }
 
